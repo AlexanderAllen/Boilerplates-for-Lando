@@ -1,0 +1,83 @@
+name: boilerplate-d8
+recipe: drupal8
+config:
+  # Location where Drupal's index.php is found.
+  webroot: html/web
+  # Composer 1x for D8-, 2x for D9+.
+  composer_version: 1-latest
+  php: '7.4'
+  database: mariadb:10.4
+  # Drush 10 -> D9+, Drush 9 -> D8-
+  drush: ^9
+
+env_file:
+  - lando/default.env
+
+tooling:
+  drush:
+    description: Executes Drush commands
+    service: appserver
+    cmd: php /app/html/vendor/bin/drush --root=/app/html/web
+
+  drupal:
+    description: Executes Drupal Console commands
+    service: appserver
+    cmd: php /app/html/vendor/bin/drupal --root=/app/html/web
+
+  composer:
+    description: Executes composer commands
+    service: appserver
+    cmd: composer
+    dir: /app/html
+
+services:
+  database:
+    portforward: false
+    build_as_root:
+      - apt update -y
+      - apt-get install -y xz-utils
+
+  memcached:
+    type: memcached:1
+    portforward: false
+    mem: 64
+
+  appserver:
+    # https://docs.lando.dev/config/php.html#configuration
+    xdebug: "debug,develop,coverage"
+    config:
+      php: lando/php.ini
+
+    overrides:
+      environment:
+        DRUSH_OPTIONS_URI: https://boilerplate-d8.lndo.site
+        COMPOSER_ALLOW_XDEBUG: 1
+        COMPOSER_DISABLE_XDEBUG_WARN: 1
+        # https://xdebug.org/docs/all_settings#mode
+        XDEBUG_CONFIG: discover_client_host=false log=/tmp/xdebug.log mode=debug,develop,coverage
+        XDEBUG_REMOTE_HOST: host.docker.internal
+        # Optional, set XDEBUG_MODE manually.
+        # XDEBUG_MODE: debug,develop,coverage
+
+    # Install any system dependencies. Memcached already installed.
+    build_as_root:
+      - apt update -y
+      - apt-get install -y iputils-ping telnet vim > /dev/null 2>&1
+
+    build:
+      - bash -c "echo ''"
+      - bash -c "echo '=== INSTALL COMPOSER DEPENDENCIES ==='"
+      #- composer -v update --with-all-dependencies --working-dir=/app/html
+      - composer install --optimize-autoloader --prefer-dist --working-dir=/app/html
+
+
+      # @todo: Allow database to survice rebuilds.
+      # @todo: Mount composer cache to avoid packagist throttling.
+      # @todo: Dynamic xdebug host env var for WSL.
+
+    # Build steps that require application be running already.
+    # run:
+    #   - bash -c "echo ''"
+    #   - bash -c "echo '=== BIMBOCA - Execute runtime tasks ==='"
+    #   - php /app/html/vendor/bin/drush --root=/app/html/web cc all
+    #   - php /app/html/vendor/bin/drush --root=/app/html/web uli
