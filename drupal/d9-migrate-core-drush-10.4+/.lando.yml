@@ -1,0 +1,113 @@
+name: boilerplate-d9
+
+# https://docs.lando.dev/config/drupal9.html#getting-started
+recipe: drupal9
+config:
+  # Location where Drupal's index.php is found.
+  webroot: html/web
+  # Composer 1x for D8-, 2x for D9+.
+  composer_version: 2-latest
+
+
+  # Drush 9: D8.4+
+  # See https://docs.drush.org/en/9.x/install/
+  # Lando lets you specify the Composer version of Drush!
+  
+  # No global drush for D9+
+  # https://docs.lando.dev/config/drupal9.html#using-drush
+  # drush: ^10
+
+  # xdebug: true
+
+env_file:
+  - lando/default.env
+
+tooling:
+  drush:
+    description: Executes Drush commands
+    service: appserver
+    cmd: php /app/html/vendor/bin/drush --root=/app/html/web
+
+  drupal:
+    description: Executes Drupal Console commands
+    service: appserver
+    cmd: php /app/html/vendor/bin/drupal --root=/app/html/web
+
+  composer:
+    description: Executes composer commands
+    service: appserver
+    cmd: composer
+    dir: /app/html
+
+services:
+  database:
+    type: mariadb:10.5
+    portforward: false
+    creds:
+      user: drupal
+      password: drupal
+      database: drupal9    
+    config:
+      database: lando/custom.cnf
+    build_as_root:
+      - apt update -y
+      - apt-get install -y xz-utils
+
+  memcached:
+    type: memcached:1
+    portforward: false
+    mem: 64
+
+  appserver:
+    # https://docs.lando.dev/config/php.html#supported-versions
+    # https://www.drupal.org/docs/understanding-drupal/how-drupal-9-was-made-and-what-is-included/environment-requirements-of-drupal-9
+    # Drupal 9 requires at least PHP 7.3. PHP 7.4 is also supported but not required. PHP 8 is supported from Drupal 9.1.0. 
+    type: php:8.0
+    #via: nginx
+    
+    # https://docs.lando.dev/config/php.html#configuration
+    xdebug: "debug,develop,coverage"
+    config:
+      php: lando/php.ini
+
+    # https://docs.lando.dev/config/php.html#configuring-xdebug
+    overrides:
+      environment:
+        DRUSH_OPTIONS_URI: https://boilerplate-d9.lndo.site
+        COMPOSER_ALLOW_XDEBUG: 1
+        COMPOSER_DISABLE_XDEBUG_WARN: 1
+        # https://xdebug.org/docs/all_settings#mode
+        XDEBUG_CONFIG: discover_client_host=false log=/tmp/xdebug.log mode=debug,develop,coverage
+        XDEBUG_REMOTE_HOST: host.docker.internal
+        # Optional, set XDEBUG_MODE manually.
+        # XDEBUG_MODE: debug,develop,coverage
+
+    # Install any system dependencies. Memcached already installed.
+    # build_as_root:
+    #   - apt update -y
+    #   - apt-get install -y iputils-ping telnet vim > /dev/null 2>&1
+
+    build:
+      - bash -c "echo ''"
+      # - bash -c "echo '=== INSTALL COMPOSER DEPENDENCIES ==='"
+      # - composer -v update --with-all-dependencies --working-dir=/app/html
+      # - composer install --optimize-autoloader --prefer-dist --working-dir=/app/html
+      
+      # If you need to create a new baseline Drupal project.
+      # https://www.drupal.org/docs/develop/using-composer/using-composer-to-install-drupal-and-manage-dependencies
+      - composer create-project drupal/recommended-project:^9.2 /app/html
+
+      - composer require --working-dir=/app/html \
+          drush/drush:^10.0
+
+      # In order for the Drush Core migrate commands to show up, a site needs to be installed first.
+      - php /app/html/vendor/bin/drush --root=/app/html/web site-install standard \
+        --db-url=mysql://drupal:drupal@database:3306/drupal9 \
+        --account-name=admin \
+        --account-pass=admin \
+        --locale=en-US \
+        --site-name=d9-migrate-core \
+        --yes
+
+      - php /app/html/vendor/bin/drush --root=/app/html/web core:cron
+      - php /app/html/vendor/bin/drush --root=/app/html/web core:requirements      

@@ -1,0 +1,102 @@
+# By default, event commands will run on the appserver service
+events:
+  # pre-destroy:
+  #   - mysqldump --verbose --user=root --host=database drupal9 | xz --compress > /app/db/predestroy_backup.sql.xz
+  #   - ls -lah /app/db/latest_backup.sql.xz
+
+tooling:
+
+  console:
+    description: Open an interactive Drush console
+    service: appserver
+    dir: /app/html/web
+    cmd:
+      - php /app/html/vendor/bin/drush --root=/app/html/web php
+
+  login:
+    description: Creates a regular login link
+    service: appserver
+    dir: /app/html/web
+    cmd:
+      - echo "Logging you into ${DRUSH_OPTIONS_URI}"
+      - php /app/html/vendor/bin/drush --root=/app/html/web cache:rebuild
+      - php /app/html/vendor/bin/drush --root=/app/html/web uli --uid=2
+
+  admin:
+    description: Creates a root login link
+    service: appserver
+    dir: /app/html/web
+    cmd:
+      - php /app/html/vendor/bin/drush --root=/app/html/web cache:rebuild
+      - php /app/html/vendor/bin/drush --root=/app/html/web uublk `php /app/html/vendor/bin/drush --root=/app/html/web --pipe uinf --uid=1 --fields=name `
+      - php /app/html/vendor/bin/drush --root=/app/html/web uli --uid=1
+
+  watchdog:
+    description: Displays most recent watchdog messages.
+    service: appserver
+    dir: /app/html/web
+    cmd: php /app/html/vendor/bin/drush --root=/app/html/web wd-show
+
+  nuke:
+    description: Nuke Composer vendor dependencies.
+    service: appserver
+    dir: /app/html
+    cmd:
+      - bash -c "echo ''"
+      - bash -c "echo '=== NUKE COMPOER DEPS ==='"
+      # Git is ignoring lockfile.
+      - rm composer.lock
+      - rm -rf vendor
+      # Nuking cache may trigger packagist throttling.
+      - composer clear-cache
+
+  # todo config-dump
+
+  db-connect:
+    description: Connects to the database service
+    service: database
+    cmd: mysql --user=root
+
+  db-create:
+    description: Creates the default database
+    service: database
+    cmd: mysql --verbose --user=root --execute="create database drupal8"
+
+  db-drop:
+    description: Drops the default database
+    service: database
+    cmd: mysql --verbose --user=root --execute="drop database drupal8"
+
+  db-show:
+    description: Shows databases
+    service: database
+    cmd: mysql --user=root --execute="show databases;"
+
+  db-tables:
+    description: Shows tables for the default Lando database
+    service: database
+    cmd: mysql --verbose --user=root --execute="use drupal8; show tables;"
+
+  db-truncate:
+    description: Truncate all tables on default database
+    service: database
+    dir: /app/db
+    cmd: mysql --user=root --skip-column-names --silent --execute='show tables;' drupal8 |
+      while read table; do mysql --user=root --execute="truncate table $table" drupal8; done
+
+  db-import-xz:
+    description: Imports the most recent XZ (LZMA, Liv-Ziv-Markov) compressed database dump into the default database
+    service: database
+    dir: /app/db
+    cmd:
+      - echo "Importing `ls -Art *.xz | tail -n 1`"
+      - "xz --decompress --stdout `ls -Art *.xz | tail -n 1` |
+      mysql --user=drupal8 --password=drupal8 drupal8"
+
+  db-backup:
+    description: Backup and compress database using XZ.
+    service: database
+    cmd:
+      - mysqldump  --user=root drupal8 | xz --compress > /app/db/manual_backup.sql.xz
+      - echo "Database dump complete. Backup file is:"
+      - ls -lah /app/db/manual_backup.sql.xz
