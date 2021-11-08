@@ -9,6 +9,7 @@ config:
   database: mariadb:10.4
 
   # Drush 9: D8.4+
+  # See https://docs.drush.org/en/9.x/install/
   drush: ^9
 
 env_file:
