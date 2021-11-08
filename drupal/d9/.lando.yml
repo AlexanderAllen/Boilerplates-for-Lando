@@ -1,16 +1,23 @@
-name: boilerplate-d8
-recipe: drupal8
+name: boilerplate-d9
+
+# https://docs.lando.dev/config/drupal9.html#getting-started
+recipe: drupal9
 config:
   # Location where Drupal's index.php is found.
   webroot: html/web
   # Composer 1x for D8-, 2x for D9+.
   composer_version: 2-latest
-  php: '7.4'
-  database: mariadb:10.4
+
 
   # Drush 9: D8.4+
   # See https://docs.drush.org/en/9.x/install/
-  drush: ^9
+  # Lando lets you specify the Composer version of Drush!
+  
+  # No global drush for D9+
+  # https://docs.lando.dev/config/drupal9.html#using-drush
+  # drush: ^10
+
+  # xdebug: true
 
 env_file:
   - lando/default.env
@@ -34,7 +41,14 @@ tooling:
 
 services:
   database:
+    type: mariadb:10.5
     portforward: false
+    creds:
+      user: drupal
+      password: drupal
+      database: drupal9    
+    config:
+      database: lando/custom.cnf
     build_as_root:
       - apt update -y
       - apt-get install -y xz-utils
@@ -45,11 +59,18 @@ services:
     mem: 64
 
   appserver:
+    # https://docs.lando.dev/config/php.html#supported-versions
+    # https://www.drupal.org/docs/understanding-drupal/how-drupal-9-was-made-and-what-is-included/environment-requirements-of-drupal-9
+    # Drupal 9 requires at least PHP 7.3. PHP 7.4 is also supported but not required. PHP 8 is supported from Drupal 9.1.0. 
+    type: php:8.0
+    #via: nginx
+    
     # https://docs.lando.dev/config/php.html#configuration
     xdebug: "debug,develop,coverage"
     config:
       php: lando/php.ini
 
+    # https://docs.lando.dev/config/php.html#configuring-xdebug
     overrides:
       environment:
         DRUSH_OPTIONS_URI: https://boilerplate-d8.lndo.site
@@ -75,10 +96,12 @@ services:
       # If you need to create a new baseline Drupal project.
       # https://www.drupal.org/docs/develop/using-composer/using-composer-to-install-drupal-and-manage-dependencies
       - composer create-project drupal/recommended-project:^9.2 /app/html
-      - composer require drush/drush:^10.3.0 \
-          drupal/migrate_plus:^5.1 \
-          drupal/migrate_tools:^5.0 \
-          drupal/migrate_upgrade:^3.2
+      - composer require drush/drush:^10.3.0
+
+      # - composer require drush/drush:^10.3.0 \
+      #     drupal/migrate_plus:^5.1 \
+      #     drupal/migrate_tools:^5.0 \
+      #     drupal/migrate_upgrade:^3.2
 
 
       # @todo: Allow database to survice rebuilds.
