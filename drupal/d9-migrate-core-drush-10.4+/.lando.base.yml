@@ -13,6 +13,20 @@ tooling:
     cmd:
       - php /app/html/vendor/bin/drush --root=/app/html/web php
 
+  install:
+    description: Install a fresh Drupal database
+    service: appserver
+    dir: /app/html
+    cmd:
+      - php /app/html/vendor/bin/drush --root=/app/html site-install standard -y \
+        --db-url=mysql://drupal:drupal@database:3306/drupal9 \
+        --db-su=drupal \
+        --db-su-pw=drupal \
+        --site-name=d9-migrate-core
+      - php /app/html/vendor/bin/drush --root=/app/html/web user:password admin "admin"
+      - php /app/html/vendor/bin/drush --root=/app/html/web core:cron
+      - php /app/html/vendor/bin/drush --root=/app/html/web core:requirements            
+
   login:
     description: Creates a regular login link
     service: appserver

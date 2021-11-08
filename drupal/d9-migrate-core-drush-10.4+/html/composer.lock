@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4180e06742c140e938412dcc65f39fdc",
+    "content-hash": "e5e23309cfe250086f5bb875c4b47900",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -6083,6 +6083,7 @@
                 "issues": "https://github.com/webmozart/path-util/issues",
                 "source": "https://github.com/webmozart/path-util/tree/2.3.0"
             },
+            "abandoned": "symfony/filesystem",
             "time": "2015-12-17T08:42:14+00:00"
         }
     ],

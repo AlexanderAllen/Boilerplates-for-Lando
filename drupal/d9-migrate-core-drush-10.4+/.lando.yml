@@ -93,6 +93,10 @@ services:
       # - composer -v update --with-all-dependencies --working-dir=/app/html
       # - composer install --optimize-autoloader --prefer-dist --working-dir=/app/html
       
+      # Cleanup app dir before clean install.
+      - rm -rf /app/html
+      - mkdir /app/html
+
       # If you need to create a new baseline Drupal project.
       # https://www.drupal.org/docs/develop/using-composer/using-composer-to-install-drupal-and-manage-dependencies
       - composer create-project drupal/recommended-project:^9.2 /app/html
@@ -100,14 +104,3 @@ services:
       - composer require --working-dir=/app/html \
           drush/drush:^10.0
 
-      # In order for the Drush Core migrate commands to show up, a site needs to be installed first.
-      - php /app/html/vendor/bin/drush --root=/app/html/web site-install standard \
-        --db-url=mysql://drupal:drupal@database:3306/drupal9 \
-        --account-name=admin \
-        --account-pass=admin \
-        --locale=en-US \
-        --site-name=d9-migrate-core \
-        --yes
-
-      - php /app/html/vendor/bin/drush --root=/app/html/web core:cron
-      - php /app/html/vendor/bin/drush --root=/app/html/web core:requirements      
