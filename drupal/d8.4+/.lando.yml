@@ -4,10 +4,11 @@ config:
   # Location where Drupal's index.php is found.
   webroot: html/web
   # Composer 1x for D8-, 2x for D9+.
-  composer_version: 1-latest
+  composer_version: 2-latest
   php: '7.4'
   database: mariadb:10.4
-  # Drush 10 -> D9+, Drush 9 -> D8-
+
+  # Drush 9: D8.4+
   drush: ^9
 
 env_file:
