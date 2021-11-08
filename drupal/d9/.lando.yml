@@ -96,12 +96,16 @@ services:
       # If you need to create a new baseline Drupal project.
       # https://www.drupal.org/docs/develop/using-composer/using-composer-to-install-drupal-and-manage-dependencies
       - composer create-project drupal/recommended-project:^9.2 /app/html
-      - composer require drush/drush:^10.3.0
+
+      # Install a Migrate Tools friendly Drush 10.x version.
+      # Migrate Tools 5.x (contrib) must be used w/ Drush <= 10.3.
+      - composer require --working-dir=/app/html \
+          drush/drush:~10.3.0 \
+          drupal/migrate_plus:^5.1 \
+          drupal/migrate_tools:^5.0 \
+          drupal/migrate_upgrade:^3.2
 
       # - composer require drush/drush:^10.3.0 \
-      #     drupal/migrate_plus:^5.1 \
-      #     drupal/migrate_tools:^5.0 \
-      #     drupal/migrate_upgrade:^3.2
 
 
       # @todo: Allow database to survice rebuilds.

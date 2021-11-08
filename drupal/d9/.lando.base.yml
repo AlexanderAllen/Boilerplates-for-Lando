@@ -1,7 +1,7 @@
 # By default, event commands will run on the appserver service
 events:
   pre-destroy:
-    - mysqldump --verbose --user=root --host=database drupal8 | xz --compress > /app/db/predestroy_backup.sql.xz
+    - mysqldump --verbose --user=root --host=database drupal9 | xz --compress > /app/db/predestroy_backup.sql.xz
     - ls -lah /app/db/latest_backup.sql.xz
 
 tooling:

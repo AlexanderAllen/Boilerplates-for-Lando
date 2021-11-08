@@ -18,7 +18,11 @@
         "composer/installers": "^1.9",
         "drupal/core-composer-scaffold": "^9.2",
         "drupal/core-project-message": "^9.2",
-        "drupal/core-recommended": "^9.2"
+        "drupal/core-recommended": "^9.2",
+        "drupal/migrate_plus": "^5.1",
+        "drupal/migrate_tools": "^5.0",
+        "drupal/migrate_upgrade": "^3.2",
+        "drush/drush": "~10.3.0"
     },
     "conflict": {
         "drupal/drupal": "*"
