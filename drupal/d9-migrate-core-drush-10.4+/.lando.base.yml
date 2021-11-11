@@ -4,6 +4,11 @@ events:
   #   - mysqldump --verbose --user=root --host=database drupal9 | xz --compress > /app/db/predestroy_backup.sql.xz
   #   - ls -lah /app/db/latest_backup.sql.xz
 
+  pre-rebuild:
+    - appserver: chmod -R 777 /app/html
+    - appserver: rm -rf /app/html
+    - appserver: mkdir /app/html
+
 tooling:
 
   console:
