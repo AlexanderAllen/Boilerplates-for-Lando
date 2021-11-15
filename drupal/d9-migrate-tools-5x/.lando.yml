@@ -28,18 +28,18 @@ tooling:
   drush:
     description: Executes Drush commands
     service: appserver
-    cmd: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT}
+    cmd: php /app/html/vendor/bin/drush --root=/app/html/web
 
   drupal:
     description: Executes Drupal Console commands
     service: appserver
-    cmd: php ${DRUPAL_VENDOR}/bin/drupal --root=${DRUPAL_ROOT}
+    cmd: php /app/html/vendor/bin/drupal --root=/app/html/web
 
   composer:
     description: Executes composer commands
     service: appserver
     cmd: composer
-    dir: ${COMPOSER_ROOT}
+    dir: /app/html
 
 proxy:
   themailman:

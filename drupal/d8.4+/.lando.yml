@@ -80,6 +80,6 @@ services:
     # Build steps that require application be running already.
     # run:
     #   - bash -c "echo ''"
-    #   - bash -c "echo '=== BIMBOCA - Execute runtime tasks ==='"
+    #   - bash -c "echo '=== Execute runtime tasks ==='"
     #   - php /app/html/vendor/bin/drush --root=/app/html/web cc all
     #   - php /app/html/vendor/bin/drush --root=/app/html/web uli

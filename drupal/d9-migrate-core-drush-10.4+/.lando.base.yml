@@ -1,4 +1,5 @@
 # By default, event commands will run on the appserver service
+# https://docs.lando.dev/config/events.html#usage
 events:
   # pre-destroy:
   #   - mysqldump --verbose --user=root --host=database drupal9 | xz --compress > /app/db/predestroy_backup.sql.xz
