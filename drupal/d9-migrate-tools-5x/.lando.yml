@@ -14,6 +14,7 @@ config:
   # Lando lets you specify the Composer version of Drush!
   
   # No global drush for D9+
+  # (Should be doing that instead through local Composer and not Lando configs.)
   # https://docs.lando.dev/config/drupal9.html#using-drush
   # drush: ^10
 
@@ -21,37 +22,49 @@ config:
 
 env_file:
   - lando/default.env
+  - lando/private.env
 
 tooling:
   drush:
     description: Executes Drush commands
     service: appserver
-    cmd: php /app/html/vendor/bin/drush --root=/app/html/web
+    cmd: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT}
 
   drupal:
     description: Executes Drupal Console commands
     service: appserver
-    cmd: php /app/html/vendor/bin/drupal --root=/app/html/web
+    cmd: php ${DRUPAL_VENDOR}/bin/drupal --root=${DRUPAL_ROOT}
 
   composer:
     description: Executes composer commands
     service: appserver
     cmd: composer
-    dir: /app/html
+    dir: ${COMPOSER_ROOT}
+
+proxy:
+  themailman:
+    - mail.boilerplate-d9.lndo.site    
 
 services:
+
+  themailman:
+    type: mailhog
+    portforward: false
+    hogfrom:
+      - appserver
+
   database:
     type: mariadb:10.5
     portforward: false
     creds:
-      user: drupal
-      password: drupal
+      user: drupal9
+      password: drupal9
       database: drupal9    
     config:
       database: lando/custom.cnf
     build_as_root:
       - apt update -y
-      - apt-get install -y xz-utils
+      - apt-get install -y xz-utils zip
 
   memcached:
     type: memcached:1
@@ -73,7 +86,7 @@ services:
     # https://docs.lando.dev/config/php.html#configuring-xdebug
     overrides:
       environment:
-        DRUSH_OPTIONS_URI: https://boilerplate-d8.lndo.site
+        DRUSH_OPTIONS_URI: https://boilerplate-d9.lndo.site
         COMPOSER_ALLOW_XDEBUG: 1
         COMPOSER_DISABLE_XDEBUG_WARN: 1
         # https://xdebug.org/docs/all_settings#mode
@@ -115,6 +128,6 @@ services:
     # Build steps that require application be running already.
     # run:
     #   - bash -c "echo ''"
-    #   - bash -c "echo '=== BIMBOCA - Execute runtime tasks ==='"
+    #   - bash -c "echo '=== Execute runtime tasks ==='"
     #   - php /app/html/vendor/bin/drush --root=/app/html/web cc all
     #   - php /app/html/vendor/bin/drush --root=/app/html/web uli
