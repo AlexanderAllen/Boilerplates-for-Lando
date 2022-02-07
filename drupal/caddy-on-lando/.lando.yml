@@ -133,9 +133,7 @@ services:
   #     config: lando/config.user3.inc.php
   #   overrides:
   #     volumes:
-  #       - ../BaltimoreCyberTrustRoot.crt.pem:/opt/BaltimoreCyberTrustRoot.crt.pem
-
-
+  #       - ../DatabaseTrustRoot.crt.pem:/opt/DatabaseTrustRoot.crt.pem
 
 
   appserver:
