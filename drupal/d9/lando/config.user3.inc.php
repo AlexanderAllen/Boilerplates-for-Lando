@@ -15,7 +15,7 @@ $cfg['blowfish_secret'] = 'nm8p94D3ZtcAdoEtYz32sEdka7fsUyQ3';
 
 $cfg['MaxNavigationItems'] = 1000;
 $cfg['NavigationTreeTableSeparator'] = '_';
-$cfg['PmaAbsoluteUri'] = 'https://pma.bd10.lndo.site/';
+$cfg['PmaAbsoluteUri'] = 'https://pma.bd9.lndo.site/';
 
 /**
  * Servers configuration
@@ -41,7 +41,7 @@ $cfg['Servers'][$i]['nopassword'] = true;
 
 # https://docs.phpmyadmin.net/en/latest/config.html#server-connection-settings
 $i++;
-$cfg['Servers'][$i]['verbose'] = 'bd10 cloud';
+$cfg['Servers'][$i]['verbose'] = 'bd9 cloud';
 $cfg['Servers'][$i]['compress'] = true;
 $cfg['Servers'][$i]['AllowNoPassword'] = true;
 $cfg['Servers'][$i]['host'] = $_ENV['BD_PMA_HOST'];

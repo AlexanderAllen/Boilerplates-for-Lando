@@ -1,5 +1,5 @@
 # Boilerplate for Drupal 10.
-name: bd10
+name: bd9
 
 # https://docs.lando.dev/config/drupal9.html#getting-started
 recipe: drupal9
@@ -30,11 +30,11 @@ tooling:
 
 proxy:
   appserver:
-    - bd10.lndo.site
+    - bd9.lndo.site
   solr:
-    - solr.bd10.lndo.site:8983
+    - solr.bd9.lndo.site:8983
   pma:
-    - pma.bd10.lndo.site
+    - pma.bd9.lndo.site
 
 services:
 
@@ -103,7 +103,7 @@ services:
       tty: true
       # stdin_open: true
       environment:
-        DRUSH_OPTIONS_URI: https://bd10.lndo.site
+        DRUSH_OPTIONS_URI: https://bd9.lndo.site
         COMPOSER_ALLOW_XDEBUG: 1
         COMPOSER_DISABLE_XDEBUG_WARN: 1
         # https://xdebug.org/docs/all_settings#mode
