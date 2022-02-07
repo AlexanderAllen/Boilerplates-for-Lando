@@ -1,0 +1,5 @@
+version: "3.9"
+services:
+  caddy:
+    image: alexanderallen/caddy-pma:2.4.6-alpine
+    build: .

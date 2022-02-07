@@ -1,0 +1,65 @@
+{
+    http_port 80
+    https_port 8082
+	# local_certs
+	# auto_https disable_redirects
+}
+
+
+
+{
+  local_certs
+  auto_https disable_redirects
+}
+localhost
+
+respond "I am Caddy!"
+
+
+# localhost:80 {
+# 	respond "I am 80"
+# 	tls internal
+# }
+
+# localhost:443 {
+# 	respond "I am 443"
+# 	tls internal
+# }
+
+# http://localhost, https://localhost {
+# 	# respond "I am 443"
+
+# 	php_fastcgi pma-fpm:9000
+# 	tls internal
+# 	file_server
+# 	root * /var/www/html
+# }
+
+# :2022 {
+# 	php_fastcgi pma-fpm:9000
+# 	# tls internal
+# 	file_server
+# 	root * /var/www/html
+
+# 	# rewrite * /index.php
+# }
+
+# Refer to the Caddy docs for more information:
+# https://caddyserver.com/docs/caddyfile
+# https://caddyserver.com/docs/caddyfile/directives/php_fastcgi
+
+
+# Refer to the Caddy docs for more information:
+# https://caddyserver.com/docs/caddyfile
+# The Caddyfile is an easy way to configure your Caddy web server.
+#
+# Unless the file starts with a global options block, the first
+# uncommented line is always the address of your site.
+#
+# To use your own domain name (with automatic HTTPS), first make
+# sure your domain's A/AAAA DNS records are properly pointed to
+# this machine's public IP, then replace ":80" below with your
+# domain name.
+
+# https://caddyserver.com/docs/automatic-https#local-https
+# https://stackoverflow.com/a/39019877

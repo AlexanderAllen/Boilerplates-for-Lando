@@ -1,0 +1,9 @@
+localhost
+respond "I am Caddy!"
+
+
+localhost:80 {
+	respond "I am 80"
+	tls internal
+
+}
