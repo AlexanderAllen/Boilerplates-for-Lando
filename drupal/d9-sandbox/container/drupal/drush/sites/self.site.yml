@@ -1,0 +1,18 @@
+# File: self.site.yml
+# See https://www.drush.org/latest/site-aliases/
+
+live:
+  # Specifying host triggers SSH connections.
+  host: server.domain.com
+  user: www-admin
+  root: /other/path/to/live/drupal
+  uri: http://example.com
+stage:
+  host: server.domain.com
+  user: www-admin
+  root: /other/path/to/stage/drupal
+  uri: http://stage.example.com
+lando:
+  user: www-data
+  root: /app/src/web
+  uri: https://d9.lndo.site
