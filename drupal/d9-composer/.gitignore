@@ -1,3 +1,7 @@
-app
-src
-web
+
+# Ignore all Drupal core files
+src/web
+
+src/vendor
+src/private
+src/drush
