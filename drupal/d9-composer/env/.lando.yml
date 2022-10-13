@@ -10,7 +10,7 @@ name: d9
 # https://docs.lando.dev/config/drupal9.html#getting-started
 recipe: drupal9
 config:
-  webroot: ./src/web
+  webroot: web
   composer_version: 2-latest
 
   # https://docs.lando.dev/config/php.html#supported-versions
@@ -31,18 +31,18 @@ tooling:
   drush:
     description: Executes Drush commands
     service: appserver
-    cmd: php /app/src/vendor/bin/drush --root=/app/src/web
+    cmd: php /app/vendor/bin/drush --root=/app/src/web
 
   drupal:
     description: Executes Drupal Console commands
     service: appserver
-    cmd: php /app/src/vendor/bin/drupal --root=/app/src
+    cmd: php /app/vendor/bin/drupal --root=/app/src
 
   composer:
     description: Executes composer commands
     service: appserver
     cmd: composer
-    dir: /app/src
+    dir: /app
 
 proxy:
   appserver:
@@ -70,9 +70,9 @@ services:
     portforward: false
     mem: 64
 
+  # https://docs.lando.dev/config/php.html#configuration
   appserver:
-
-    # https://docs.lando.dev/config/php.html#configuration
+    app_mount: false
     xdebug: "debug,develop,coverage"
     config:
       php: lando/php.ini
@@ -88,6 +88,12 @@ services:
         # https://xdebug.org/docs/all_settings#mode
         # https://docs.lando.dev/php/config.html#configuring-xdebug
         XDEBUG_CONFIG: discover_client_host=false
+      volumes:
+        # Configure external app source.
+        - ../app:/app
+        # Mount custom scripts on top custom mount for lando tooling.
+        - lando:/opt/lando
+        - container:/opt/container
 
     build_as_root:
       - addgroup www-data tty
@@ -97,26 +103,28 @@ services:
       - docker-php-ext-enable uploadprogress
 
       # Nuke project root if present.
-      - rm -rf /app/src
+      # - rm -rf /app/src
 
     # See https://docs.lando.dev/drupal/getting-started.html#quick-start
     build:
 
       # Install Drupal via Composer.
-      - composer --working-dir=/app create-project drupal/recommended-project:9.x src
+      # - composer --working-dir=/app create-project drupal/recommended-project:9.x src
+
+      - composer install
 
       # Install local Drush dependency.
-      - composer --working-dir=/app/src require --dev drush/drush
+      # - composer --working-dir=/app/src require --dev drush/drush
 
       # Install any other Composer dependencies.
-      - composer --working-dir=/app/src require --dev \
-        drupal/memcache \
-        drupal/devel
+      # - composer --working-dir=/app/src require --dev \
+      #   drupal/memcache \
+      #   drupal/devel
 
       # Copy configs.
-      - bash -c "echo '=== COPYING CONFIGS TO DRUPAL SITE ==='"
-      - cp -r /app/container/drupal/drush /app/src
-      - cp /app/container/drupal/sites/settings-d9.php /app/src/web/sites/default/settings.php
+      # - bash -c "echo '=== COPYING CONFIGS TO DRUPAL SITE ==='"
+      # - cp -r /app/container/drupal/drush /app/src
+      # - cp /app/container/drupal/sites/settings-d9.php /app/src/web/sites/default/settings.php
 
       # Install Drupal site.
       - php ${DRUPAL_VENDOR}/bin/drush site:install -y --db-url=mysql://drupal9:drupal9@database/drupal9 --account-pass=admin --site-name=d9
@@ -126,7 +134,7 @@ services:
 
       # Configure Memcache after database import or Drupal install.
       - php ${DRUPAL_VENDOR}/bin/drush @lando pm-enable -y memcache
-      - cp /app/container/drupal/sites/memcache.lando.php /app/src/web/sites/default/
+      - cp /opt/container/drupal/sites/memcache.lando.php /app/src/web/sites/default/
 
       # Smoke test install by running deploy command.
       # - php ${DRUPAL_VENDOR}/bin/drush @lando deploy

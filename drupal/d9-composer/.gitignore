@@ -1,7 +1,7 @@
 
 # Ignore all Drupal core files
-src/web
+app/web
 
-src/vendor
-src/private
-src/drush
+app/vendor
+app/private
+app/drush
