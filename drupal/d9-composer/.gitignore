@@ -4,4 +4,4 @@ app/web
 
 app/vendor
 app/private
-app/drush
+# app/drush
