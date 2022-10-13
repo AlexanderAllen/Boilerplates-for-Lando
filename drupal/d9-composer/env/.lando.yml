@@ -108,23 +108,7 @@ services:
     # See https://docs.lando.dev/drupal/getting-started.html#quick-start
     build:
 
-      # Install Drupal via Composer.
-      # - composer --working-dir=/app create-project drupal/recommended-project:9.x src
-
       - composer install
-
-      # Install local Drush dependency.
-      # - composer --working-dir=/app/src require --dev drush/drush
-
-      # Install any other Composer dependencies.
-      # - composer --working-dir=/app/src require --dev \
-      #   drupal/memcache \
-      #   drupal/devel
-
-      # Copy configs.
-      # - bash -c "echo '=== COPYING CONFIGS TO DRUPAL SITE ==='"
-      # - cp -r /app/container/drupal/drush /app/src
-      # - cp /app/container/drupal/sites/settings-d9.php /app/src/web/sites/default/settings.php
 
       # Install Drupal site.
       - php ${DRUPAL_VENDOR}/bin/drush site:install -y --db-url=mysql://drupal9:drupal9@database/drupal9 --account-pass=admin --site-name=d9
@@ -134,7 +118,7 @@ services:
 
       # Configure Memcache after database import or Drupal install.
       - php ${DRUPAL_VENDOR}/bin/drush @lando pm-enable -y memcache
-      - cp /opt/container/drupal/sites/memcache.lando.php /app/src/web/sites/default/
+      - cp /opt/container/drupal/sites/memcache.lando.php /app/web/sites/default/
 
       # Smoke test install by running deploy command.
       # - php ${DRUPAL_VENDOR}/bin/drush @lando deploy
