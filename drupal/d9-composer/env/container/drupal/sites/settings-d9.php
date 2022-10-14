@@ -3,14 +3,6 @@
 // @codingStandardsIgnoreFile
 
 $databases = [];
-// $databases['default']['default'] = [
-//    'database' => 'drupal9',
-//    'username' => 'drupal9',
-//    'password' => 'drupal9',
-//    'host' => 'database',
-//    'driver' => 'mysql',
-// ];
-
 $databases['default']['default'] = array (
   'database' => 'drupal9',
   'username' => 'drupal9',
@@ -23,15 +15,10 @@ $databases['default']['default'] = array (
   'autoload' => 'core/modules/mysql/src/Driver/Database/mysql/',
 );
 
-// Inside project root.
-// $settings['config_sync_directory'] = '/app/src/config';
-
 // Outside project root.
-$settings['config_sync_directory'] = '/app/container/config';
+$settings['config_sync_directory'] = '/app/config';
 
 $settings['hash_salt'] = 'salty-gnome';
-
-$settings['file_public_path'] = 'sites/default/files';
 
 // The default entity_update_batch_size is 50.
 // core/modules/system/system.post_update.php, system_post_update_sort_all_config().
@@ -51,10 +38,10 @@ $settings['trusted_host_patterns'] = [
 // Drupal file upload by anonymous or untrusted users into public file systems -- PSA-2016-003
 // https://www.drupal.org/psa-2016-003
 // https://www.drupal.org/docs/8/core/modules/file/overview
-$settings['file_private_path'] = 'sites/bd9.lndo.site/private';
 // $settings['file_private_path'] = $app_root . '/../private';
+$settings['file_public_path'] = 'sites/default/files';
+$settings['file_private_path'] = '/app/private';
 $settings['file_temp_path'] = '/tmp';
-$settings['file_private_path'] = '/app/src/private';
 
 /**
  * Assertions.
