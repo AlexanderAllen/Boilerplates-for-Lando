@@ -116,7 +116,7 @@ services:
       - composer --working-dir=/app/src install
 
       # Install or import Drupal database.
-      - php ${DRUPAL_VENDOR}/bin/drush --root=${COMPOSER_ROOT} site:install -y --db-url=mysql://drupal9:drupal9@database/drupal9 --account-pass=admin --site-name=d9
+      - php ${DRUPAL_VENDOR}/bin/drush --root=${COMPOSER_ROOT} site:install -y --db-url=mysql://drupal9:drupal9@database/drupal9 --account-pass=admin --site-name=${LANDO_APP_NAME}
 
       # Export initial install configuration.
       # - php ${DRUPAL_VENDOR}/bin/drush --working-dir=/app/src @lando cex -y
