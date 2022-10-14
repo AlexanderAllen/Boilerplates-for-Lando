@@ -1,7 +1,3 @@
 
-# Ignore all Drupal core files
-app/web
-
-app/vendor
-app/private
-# app/drush
+# Ignore project source code.
+app

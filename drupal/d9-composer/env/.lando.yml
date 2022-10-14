@@ -10,7 +10,7 @@ name: d9
 # https://docs.lando.dev/config/drupal9.html#getting-started
 recipe: drupal9
 config:
-  webroot: web
+  webroot: src/web
   composer_version: 2-latest
 
   # https://docs.lando.dev/config/php.html#supported-versions
@@ -89,7 +89,7 @@ services:
         # https://docs.lando.dev/php/config.html#configuring-xdebug
         XDEBUG_CONFIG: discover_client_host=false
       volumes:
-        # Configure external app source.
+        # Mount shared source location.
         - ../app:/app
         # Mount custom scripts on top custom mount for lando tooling.
         - lando:/opt/lando
@@ -98,27 +98,32 @@ services:
     build_as_root:
       - addgroup www-data tty
 
+      # Nuke project root if present.
+      - echo "Nuking existing project from orbit!"
+      - rm -rf /app/src
+
       # See https://docs.lando.dev/php/extensions.html#adding-or-removing-extensions
       - pecl install uploadprogress
       - docker-php-ext-enable uploadprogress
 
-      # Nuke project root if present.
-      # - rm -rf /app/src
-
     # See https://docs.lando.dev/drupal/getting-started.html#quick-start
     build:
 
-      - composer install
+      # Clone project source code.
+      - git clone git@github.com:AlexanderAllen/example-source-drupal9.git /app/src
 
-      # Install Drupal site.
-      - php ${DRUPAL_VENDOR}/bin/drush site:install -y --db-url=mysql://drupal9:drupal9@database/drupal9 --account-pass=admin --site-name=d9
+      # Install Drupal dependencies via Composer.
+      - composer --working-dir=/app/src install
+
+      # Install or import Drupal database.
+      - php ${DRUPAL_VENDOR}/bin/drush --root=${COMPOSER_ROOT} site:install -y --db-url=mysql://drupal9:drupal9@database/drupal9 --account-pass=admin --site-name=d9
 
       # Export initial install configuration.
-      # - php ${DRUPAL_VENDOR}/bin/drush @lando cex -y
+      # - php ${DRUPAL_VENDOR}/bin/drush --working-dir=/app/src @lando cex -y
 
       # Configure Memcache after database import or Drupal install.
-      - php ${DRUPAL_VENDOR}/bin/drush @lando pm-enable -y memcache
-      - cp /opt/container/drupal/sites/memcache.lando.php /app/web/sites/default/
+      - php ${DRUPAL_VENDOR}/bin/drush --root=${COMPOSER_ROOT} pm-enable -y memcache
+      - cp /opt/container/drupal/sites/memcache.lando.php /app/src/web/sites/default/
 
       # Smoke test install by running deploy command.
       # - php ${DRUPAL_VENDOR}/bin/drush @lando deploy

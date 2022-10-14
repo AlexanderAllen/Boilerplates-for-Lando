@@ -1,12 +1,7 @@
+
 # For more information on events, see https://docs.lando.dev/config/events.html.
 # By default, event commands will run on the appserver service
-
 events:
-  pre-destroy:
-    # Copy of private.env into non-gitignore path before nuking everything.
-    - cp /app/lando/private.env /app/lando/private-backup.env
-    - database: lando/scripts/dump.sh
-
   post-start:
     # Courtesy welcome and login link.
     - appserver: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} cron -y
