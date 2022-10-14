@@ -31,18 +31,18 @@ tooling:
   drush:
     description: Executes Drush commands
     service: appserver
-    cmd: php /app/vendor/bin/drush --root=/app/src/web
+    cmd: php /app/src/vendor/bin/drush --root=/app/src
 
   drupal:
     description: Executes Drupal Console commands
     service: appserver
-    cmd: php /app/vendor/bin/drupal --root=/app/src
+    cmd: php /app/src/vendor/bin/drupal --root=/app/src
 
   composer:
     description: Executes composer commands
     service: appserver
     cmd: composer
-    dir: /app
+    dir: /app/src
 
 proxy:
   appserver:
