@@ -1,3 +1,6 @@
 
 # Ignore project source code.
 app
+
+# Ignore mounted database data directory.
+env/data
