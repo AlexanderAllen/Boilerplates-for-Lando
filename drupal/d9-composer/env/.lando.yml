@@ -54,6 +54,7 @@ services:
   # Version 10.6 is current LTS, supported until July 2026.
   database:
     type: mariadb:10.6
+    app_mount: disabled
     portforward: false
     creds:
       user: drupal9
@@ -64,6 +65,17 @@ services:
     build_as_root:
       - apt update -y
       - apt-get install -y xz-utils zip lz4 pv git
+    overrides:
+      environment:
+        MARIADB_SKIP_TEST_DB: yes
+        ALLOW_EMPTY_PASSWORD: yes
+        MARIADB_ENABLE_SLOW_QUERY: 1
+        MARIADB_LONG_QUERY_TIME: 3
+      # Make database persistent.
+      # See https://hub.docker.com/r/bitnami/mariadb for instructions.
+      # For Bitnami/fMariaDB, ensure directory is owned by uid 1001 prior to mounting.
+      volumes:
+        - data:/bitnami/mariadb
 
   memcached:
     type: memcached:1
