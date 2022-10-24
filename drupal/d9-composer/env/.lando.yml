@@ -88,6 +88,17 @@ services:
         # https://xdebug.org/docs/all_settings#mode
         # https://docs.lando.dev/php/config.html#configuring-xdebug
         XDEBUG_CONFIG: discover_client_host=false
+
+        # Optional, set XDEBUG_MODE manually.
+        # XDEBUG_MODE: debug,develop,coverage
+
+        # https://alexanderallen.medium.com/visual-studio-code-wsl-running-php-intellisense-from-alpine-linux-on-windows-10-78e8a990f1cc
+        # Set privately via private.env for Windows environments.
+        # XDEBUG_CONNECT_BACK: 0
+        # XDEBUG_REMOTE_HOST: <replace with WSL ipconfig/eth0>
+        # OSX environments may sometimes use:
+        XDEBUG_REMOTE_HOST: host.docker.internal
+
       volumes:
         # Mount shared source location.
         - ../app:/app
