@@ -106,6 +106,10 @@ services:
       - pecl install uploadprogress
       - docker-php-ext-enable uploadprogress
 
+      # Network debugging tools.
+      - apt update -y
+      - apt-get install -y telnet iputils-ping iproute2
+
     # See https://docs.lando.dev/drupal/getting-started.html#quick-start
     build:
 
