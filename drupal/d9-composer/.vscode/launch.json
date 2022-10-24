@@ -8,7 +8,29 @@
       "name": "Listen for Xdebug",
       "type": "php",
       "request": "launch",
-      "port": 9003
+      "port": 9003,
+      "pathMappings": {
+        "/app": "${workspaceFolder}/app"
+      },
+      "xdebugSettings": {
+        "show_hidden": 1,
+      },
+      "hostname": "localhost"
+    },
+    {
+      "name": "Stop on entry",
+      "type": "php",
+      "request": "launch",
+      "port": 9003,
+      "pathMappings": {
+        "/app": "${workspaceFolder}/app"
+      },
+      "stopOnEntry": true,
+      "xdebugSettings": {
+        "show_hidden": 1,
+      },
+      "log": true,
+      "hostname": "localhost",
     },
     {
       "name": "Launch currently open script",
@@ -22,7 +44,8 @@
       ],
       "env": {
         "XDEBUG_MODE": "debug,develop",
-        "XDEBUG_CONFIG": "client_port=${port}"
+        "XDEBUG_CONFIG": "discover_client_host=false",
+        "XDEBUG_REMOTE_HOST": "host.docker.internal"
       }
     },
     {
