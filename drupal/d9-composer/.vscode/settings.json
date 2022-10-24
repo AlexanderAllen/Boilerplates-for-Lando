@@ -1,0 +1,18 @@
+{
+    //
+    // https://www.drupal.org/docs/contributed-modules/code-review-module/installing-coder-sniffer
+    // https://www.drupal.org/project/coder
+    "phpcs.enable": true,
+
+    // While you can hardcode a single standard here, it is not recommended
+    // because Drupal uses at least two standards.
+    // "phpcs.standard": "/home/wsl/.composer/vendor/drupal/coder/coder_sniffer/Drupal",
+
+    // Tell the PHPCS extension to search for phpcs.xml in the project root.
+    "phpcs.autoConfigSearch": true,
+    "phpcs.showSources": true,
+    "phpcs.executablePath": "/home/wsl/.composer/vendor/bin/phpcs",
+
+    // This settings is not neccesary.
+    // "phpcs.composerJsonPath": "/home/wsl/.composer/composer.json"
+}
