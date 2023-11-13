@@ -96,7 +96,10 @@ services:
     # https://docs.lando.dev/config/php.html#supported-versions
     # https://www.drupal.org/docs/understanding-drupal/how-drupal-9-was-made-and-what-is-included/environment-requirements-of-drupal-9
     # Drupal 9 requires at least PHP 7.3. PHP 7.4 is also supported but not required. PHP 8 is supported from Drupal 9.1.0.
-    type: php:7.4
+    #
+    # November 13, 2023
+    # Drupal 9.5.11 recommends PHP 8.1.6 or higher, "Drupal wants at least 8.0".
+    type: php:8.2
 
     # https://docs.lando.dev/config/php.html#configuration
     xdebug: "debug,develop,coverage"
