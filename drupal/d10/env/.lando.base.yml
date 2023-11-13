@@ -1,0 +1,162 @@
+# By default, event commands will run on the appserver service
+events:
+  pre-destroy:
+    # Copy of private.env into non-gitignore path before nuking everything.
+    - cp /app/lando/private.env /app/private.env
+    # - database: lando/scripts/dump.sh
+  # post-start:
+  #   - appserver: netstat -nr | grep '^0\.0\.0\.0' | awk '{print $2}' > /opt/$LANDO_APP_PROJECT/XDEBUG_REMOTE_HOST
+
+tooling:
+
+  login:
+    description: Creates a regular login link
+    service: appserver
+    dir: /app
+    cmd:
+      - echo "Logging you into ${DRUSH_OPTIONS_URI}"
+      - php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} cache:rebuild
+      - php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} uli --uid=2
+
+  admin:
+    description: Creates a root login link
+    service: appserver
+    cmd:
+      - appserver: ./lando/scripts/user-reset.sh
+
+  console:
+    description: Open an interactive shell for Drupal
+    service: appserver
+    dir: /app
+    cmd:
+      - php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} php:cli
+
+  watchdog:
+    description: Displays most recent watchdog messages
+    service: appserver
+    dir: /app
+    cmd: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} wd-show
+
+  install:
+    description: Install a fresh Drupal database
+    service: appserver
+    dir: /app/html
+    cmd:
+      - php `${DRUPAL_VENDOR}/bin/drush --root=${COMPOSER_ROOT} site-install --yes --db-url=mysql://${APP_DB_ROOTUSER}@database:3306/${APP_DB_NAME}
+        --db-su=${APP_DB_USER}
+        --db-su-pw=${APP_DB_PASS}
+        --account-name="admin"
+        --account-pass="admin"
+        --uri=${DRUSH_OPTIONS_URI}
+        --site-name="boilerplate-d9"
+        standard`
+
+  nuke:
+    description: Nuke Composer vendor dependencies
+    service: appserver
+    dir: /app
+    cmd:
+      - bash -c "echo ''"
+      - bash -c "echo '=== NUKE COMPOER DEPS ==='"
+      # Git is ignoring lockfile.
+      - rm composer.lock
+      - rm -rf vendor
+      # Nuking cache may trigger packagist throttling.
+      - composer clear-cache
+
+  db-connect:
+    description: Connects to the database service
+    service: database
+    cmd: mysql --user=${APP_DB_ROOTUSER}
+
+  db-create:
+    description: Creates the default database
+    service: database
+    cmd: mysql --verbose --user=${APP_DB_ROOTUSER} --execute="create database ${APP_DB_NAME}"
+
+  db-drop:
+    description: Drops the default database
+    service: database
+    cmd: mysql --verbose --user=${APP_DB_ROOTUSER} --execute="drop database ${APP_DB_NAME}"
+
+  db-show:
+    description: Shows databases
+    service: database
+    cmd: mysql --user=${APP_DB_ROOTUSER} --execute="show databases;"
+
+  db-tables:
+    description: Shows tables for the default Lando database
+    service: database
+    cmd: mysql --verbose --user=${APP_DB_ROOTUSER} --execute="use ${APP_DB_NAME}; show tables;"
+
+  db-truncate:
+    description: Truncate all tables on default database
+    service: database
+    dir: /app/db
+    cmd: mysql --user=${APP_DB_ROOTUSER} --skip-column-names --silent --execute='show tables;' ${APP_DB_NAME} |
+      while read table; do mysql --user=${APP_DB_ROOTUSER} --execute="truncate table $table" ${APP_DB_NAME}; done
+
+  db-import-plain:
+    description: Import plain sql dump
+    dir: /app/db
+    cmd:
+      - database: echo "Importing `ls -Art *.sql | tail -n 1`"
+      - database: "mysql --user=${APP_DB_USER} --password=${APP_DB_PASS} ${APP_DB_NAME} <
+      `ls -Art *.sql | tail -n 1`"
+      - appserver: ../lando/scripts/user-reset.sh
+      - appserver: ../lando/scripts/schema-updates.sh
+
+  schema-updates:
+    description: Run schema updates after an import.
+    cmd:
+      - appserver: ./lando/scripts/schema-updates.sh
+      - appserver: ./lando/scripts/user-reset.sh
+
+  salt:
+    description: Generate settings.php hash_salt
+    dir: /app
+    cmd:
+      - appserver: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} php-eval 'echo \Drupal\Component\Utility\Crypt::randomBytesBase64(55)' > /opt/${LANDO_APP_NAME}/private/salt.txt
+
+  # Windows services like to use .zip sometimes (Azure).
+  db-import-zip:
+    description: Import .zip-formatted db dump
+    service: database
+    dir: /app/db
+    cmd:
+      - echo "Importing `ls -Art *.zip | tail -n 1`"
+      - "unzip -p `ls -Art *.zip | tail -n 1` |
+      mysql --user=${APP_DB_USER} --password=${APP_DB_PASS} ${APP_DB_NAME}"
+
+  db-import-xz:
+    description: Import the most recent XZ (LZMA, Liv-Ziv-Markov) compressed dump into the default database
+    service: database
+    dir: /app/db
+    cmd:
+      - echo "Importing `ls -Art *.xz | tail -n 1`"
+      - "xz --decompress --stdout `ls -Art *.xz | tail -n 1` |
+      mysql --user=${APP_DB_USER} --password=${APP_DB_PASS} ${APP_DB_NAME}"
+
+  db-dump:
+    description: Same as Lando db-export, but with timestamp.
+    cmd:
+      - appserver: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} cr
+      - database: lando/scripts/dump.sh
+
+  solr-config:
+    description: Exports Drupal's Solr config into local filesystem.
+    service: appserver
+    dir: /app
+    cmd:
+      - php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} search-api-solr:get-server-config lando config/search_api_solr/download/get-server-config.zip
+      - unzip -o config/search_api_solr/download/get-server-config.zip -d config/search_api_solr/download/get-server-config
+
+  dd:
+    description: Debug a Drush command with XDebug.
+    cmd:
+      - appserver: lando/scripts/dd.sh
+
+  phpunit:
+    description: Invokes PHPUnit binary.
+    cmd:
+      - appserver: vendor/bin/phpunit
