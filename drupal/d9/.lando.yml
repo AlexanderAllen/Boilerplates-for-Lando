@@ -67,7 +67,12 @@ services:
       - apt install -y iputils-ping inetutils-telnet
 
   database:
-    type: mariadb:10.5
+    # Nov 13, 2023
+    # MariaDB 10.6 is the current long-term maintenance stable version.
+    # The first stable release was in July 2021, and it will be maintained until July 2026.
+    # https://mariadb.com/kb/en/changes-improvements-in-mariadb-106/
+    # https://docs.lando.dev/mariadb/
+    type: mariadb:10.6
     portforward: false
     creds:
       user: drupal9
