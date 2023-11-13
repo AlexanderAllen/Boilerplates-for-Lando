@@ -150,3 +150,9 @@ tooling:
     description: Debug a Drush command with XDebug.
     cmd:
       - appserver: lando/scripts/dd.sh
+
+  # https://www.drupal.org/docs/distributions/creating-distributions/how-to-write-a-drupal-installation-profile#s-configuration-files
+  # reset-uuids:
+    # find /path/to/PROFILE_NAME/config/install/ -type f -exec sed -i -e '/^uuid: /d' {} \;
+    # find /path/to/PROFILE_NAME/config/install/ -type f -exec sed -i -e '/_core:/,+1d' {} \;
+
