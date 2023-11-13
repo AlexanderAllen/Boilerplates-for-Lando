@@ -33,15 +33,33 @@ tooling:
 proxy:
   appserver:
     - d10.lndo.site
+    - d10
   solr:
-    - d10.solr.lndo.site:8983
+    - solr.d10.lndo.site:8983
+  mail:
+    - mail.lndo.site
+    # 8025
+    - mail.d10.lndo.site
+
+
   # pma:
   #   - d10.pma.lndo.site
+
+  # appserver:
+  #   - bd9.lndo.site
+  # solr:
+  #   - solr.bd9.lndo.site:8983
+  # pma:
+  #   - pma.bd9.lndo.site
+
 
 services:
 
   mail:
+    # See https://github.com/mailhog/MailHog
     type: mailhog
+    hogfrom:
+      - appserver
 
   solr:
     type: solr:8
@@ -134,7 +152,7 @@ services:
       tty: true
       # stdin_open: true
       environment:
-        DRUSH_OPTIONS_URI: https://d10.lndo.site
+        DRUSH_OPTIONS_URI: https://app.d10.lndo.site
         COMPOSER_ALLOW_XDEBUG: 1
         COMPOSER_DISABLE_XDEBUG_WARN: 1
         # https://docs.lando.dev/config/php.html#configuring-xdebug
@@ -161,7 +179,7 @@ services:
       - apt-get install -y telnet iputils-ping iproute2
 
       # Drupal perms are stubborn, cleanup as root for fresh installs.
-      - printf "\n == NUKING DRUPAL FROM ORBIT !!! \r"
+      - printf '\n%s\n\n' '== NUKING DRUPAL FROM ORBIT !!!'
       - rm -rf docroot
 
     # Before service runs, as non-root.
@@ -171,14 +189,14 @@ services:
 
       # For fresh install with no composer.json
       # https://www.drupal.org/docs/develop/using-composer/manage-dependencies
-      - printf "\n == COPY CUSTOM DRUPAL SETTINGS === \r"
+      - printf '\n%s\n\n' '== COPY CUSTOM DRUPAL SETTINGS ==='
       - composer create-project drupal/recommended-project docroot
 
-      - printf '\n%s\n\r' '== ADDING LOCAL DRUSH =='
+      - printf '\n%s\n\n' '== ADDING LOCAL DRUSH =='
       - composer --working-dir=docroot require drush/drush
 
     run_as_root:
-      - printf "\n == COPY CUSTOM DRUPAL SETTINGS === \r"
+      - printf '\n%s\n\n' '== COPY CUSTOM DRUPAL SETTINGS ==='
       - cp lando/settings.* docroot/web/sites/default/
       - chown www-data docroot/web/sites/default/settings.*
       - ls -la docroot/web/sites/default/settings.*
@@ -186,9 +204,8 @@ services:
     # After service is up and running.
     run:
       # finally, use Drush to install Drupal.
-      - printf '\n%s\n\r' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
+      - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
+      - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://app.${LANDO_APP_NAME}.lndo.site standard
 
-      - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://d10.lndo.site standard install_configure_form.enable_update_status_emails=NULL
-
-      - printf '\n%s\n\r' '== GOING LIVE !! =='
+      - printf '\n%s\n' '== DRUSH SANITY CHECK =='
       - php docroot/vendor/bin/drush --root=docroot/web status
