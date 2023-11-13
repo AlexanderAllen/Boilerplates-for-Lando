@@ -140,7 +140,7 @@ services:
       tty: true
       # stdin_open: true
       environment:
-        DRUSH_OPTIONS_URI: https://app.d10.lndo.site
+        DRUSH_OPTIONS_URI: https://d10.lndo.site
         COMPOSER_ALLOW_XDEBUG: 1
         COMPOSER_DISABLE_XDEBUG_WARN: 1
         # https://docs.lando.dev/config/php.html#configuring-xdebug
@@ -190,7 +190,7 @@ services:
 
       # finally, use Drush to install Drupal.
       - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
-      - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://app.${LANDO_APP_NAME}.lndo.site standard
+      - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://${LANDO_APP_NAME}.lndo.site standard
 
       # Fix settings perms, only after install is done.
       # https://www.drupal.org/docs/7/install/step-3-create-settingsphp-and-the-files-directory
@@ -199,6 +199,8 @@ services:
 
     # After service is up and running.
     run:
+      - php docroot/vendor/bin/drush --root=docroot/web cron
+
       - printf '\n%s\n' '== DRUSH SANITY CHECK =='
       - php docroot/vendor/bin/drush --root=docroot/web status
 
