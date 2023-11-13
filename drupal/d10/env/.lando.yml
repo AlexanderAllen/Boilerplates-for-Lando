@@ -37,21 +37,9 @@ proxy:
   solr:
     - solr.d10.lndo.site:8983
   mail:
-    - mail.lndo.site
-    # 8025
     - mail.d10.lndo.site
-
-
   # pma:
   #   - d10.pma.lndo.site
-
-  # appserver:
-  #   - bd9.lndo.site
-  # solr:
-  #   - solr.bd9.lndo.site:8983
-  # pma:
-  #   - pma.bd9.lndo.site
-
 
 services:
 
