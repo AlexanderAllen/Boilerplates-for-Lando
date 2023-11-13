@@ -192,26 +192,15 @@ services:
       - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
       - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://app.${LANDO_APP_NAME}.lndo.site standard
 
-      - printf '\n%s\n' '== DRUSH SANITY CHECK =='
-      - php docroot/vendor/bin/drush --root=docroot/web status
-
       # Fix settings perms, only after install is done.
       # https://www.drupal.org/docs/7/install/step-3-create-settingsphp-and-the-files-directory
       - chmod 555 docroot/web/sites/default
       - chmod 444 docroot/web/sites/default/settings.*
 
-
-    # run_as_root:
-    #   - printf '\n%s\n\n' '== COPY CUSTOM DRUPAL SETTINGS ==='
-    #   - cp lando/settings.* docroot/web/sites/default/
-    #   - chown www-data docroot/web/sites/default/settings.*
-    #   - ls -la docroot/web/sites/default/settings.*
-
     # After service is up and running.
-    # run:
-    #   # finally, use Drush to install Drupal.
-    #   - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
-    #   - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://app.${LANDO_APP_NAME}.lndo.site standard
+    run:
+      - printf '\n%s\n' '== DRUSH SANITY CHECK =='
+      - php docroot/vendor/bin/drush --root=docroot/web status
 
-    #   - printf '\n%s\n' '== DRUSH SANITY CHECK =='
-    #   - php docroot/vendor/bin/drush --root=docroot/web status
+      - printf '\n%s\n' '== COURTESY ADMIN LOGIN LINK =='
+      - php docroot/vendor/bin/drush --root=docroot/web uli
