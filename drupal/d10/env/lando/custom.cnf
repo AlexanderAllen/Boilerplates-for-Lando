@@ -1,0 +1,6 @@
+# Set isolation level in Drupal 10.
+# https://www.drupal.org/docs/getting-started/system-requirements/setting-the-mysql-transaction-isolation-level
+# https://mariadb.com/docs/server/ref/mdb/system-variables/tx_isolation/
+
+[mariadb]
+transaction_isolation=READ-COMMITTED
