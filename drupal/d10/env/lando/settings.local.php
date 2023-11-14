@@ -25,7 +25,9 @@ $settings['config_sync_directory'] = '/app/config/sync';
 // https://www.drupal.org/docs/installing-drupal/trusted-host-settings
 $settings['trusted_host_patterns'] = [
   '^localhost$',
-  "^${LANDO_APP_NAME}\.lndo\.site$"
+  "^${LANDO_APP_NAME}\.lndo\.site$",
+  // "^app\.${LANDO_APP_NAME}\.lndo\.site$",
+  "^d10$",
 ];
 
 $settings['file_public_path'] = $WEB_ROOT . '/sites/default/files';
