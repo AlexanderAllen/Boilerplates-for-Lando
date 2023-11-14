@@ -1,5 +1,5 @@
-# Boilerplate for Drupal 10
-name: d10e
+# Boilerplate for Drupal 10 projects with existing external source code.
+name: d10ee
 
 # https://docs.lando.dev/config/drupal9.html#getting-started
 recipe: drupal10
@@ -32,14 +32,14 @@ tooling:
 
 proxy:
   appserver:
-    - d10e.lndo.site
+    - d10ee.lndo.site
     - d10
   # solr:
   #   - solr.d10.lndo.site:8983
   mail:
-    - mail.d10e.lndo.site
-  pma:
-    - pma.d10e.lndo.site
+    - mail.d10ee.lndo.site
+  # pma:
+  #   - pma.d10ee.lndo.site
 
 services:
 
@@ -60,22 +60,22 @@ services:
 
   # https://hub.docker.com/_/phpmyadmin
   # https://docs.phpmyadmin.net/en/latest/setup.html#customizing-configuration
-  pma:
-    type: compose
-    app_mount: false
-    portforward: false
+  # pma:
+  #   type: compose
+  #   app_mount: false
+  #   portforward: false
 
-    # Generate a certificate for the container on the proxy.
-    ssl: true
+  #   # Generate a certificate for the container on the proxy.
+  #   ssl: true
 
-    services:
-      image: phpmyadmin:5.2.1-apache
-      command: /docker-entrypoint.sh apache2-foreground
-      volumes:
-        - ../lando/resources/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
-    build_as_root:
-      - apt update
-      - apt install -y iputils-ping inetutils-telnet
+  #   services:
+  #     image: phpmyadmin:5.2.1-apache
+  #     command: /docker-entrypoint.sh apache2-foreground
+  #     volumes:
+  #       - ../lando/resources/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+  #   build_as_root:
+  #     - apt update
+  #     - apt install -y iputils-ping inetutils-telnet
 
   database:
     # Nov 13, 2023
@@ -91,6 +91,9 @@ services:
       database: drupalX
     config:
       database: ../lando/resources/custom.cnf
+    overrides:
+      volumes:
+        - ~/dreamy-ritchie/db:/var/lib/mysql
     build_as_root:
       - apt update -y
       - apt-get install -y xz-utils zip lz4 pv git
@@ -141,7 +144,7 @@ services:
       tty: true
       # stdin_open: true
       environment:
-        DRUSH_OPTIONS_URI: https://d10e.lndo.site
+        DRUSH_OPTIONS_URI: https://d10ee.lndo.site
         COMPOSER_ALLOW_XDEBUG: 1
         COMPOSER_DISABLE_XDEBUG_WARN: 1
         # https://docs.lando.dev/config/php.html#configuring-xdebug
@@ -168,35 +171,35 @@ services:
       - apt-get install -y telnet iputils-ping iproute2
 
       # Drupal perms are stubborn, cleanup as root for fresh installs.
-      - printf '\n%s\n\n' '== NUKING DRUPAL FROM ORBIT !!!'
-      - rm -rf docroot
+      # - printf '\n%s\n\n' '== NUKING DRUPAL FROM ORBIT !!!'
+      # - rm -rf docroot
 
     # Before service runs, as non-root.
     build:
       # For installs with existing composer.json.
-      # - composer --no-interaction install
+      - composer --no-interaction --working-dir=docroot install
 
       # For fresh install with no composer.json
       # https://www.drupal.org/docs/develop/using-composer/manage-dependencies
-      - printf '\n%s\n\n' '== SERVING SOME FRESH COMPOSER DEPENDENCIES ==='
-      - composer create-project drupal/recommended-project docroot
+      # - printf '\n%s\n\n' '== SERVING SOME FRESH COMPOSER DEPENDENCIES ==='
+      # - composer create-project drupal/recommended-project docroot
 
-      - printf '\n%s\n\n' '== ADDING LOCAL DRUSH =='
-      - composer --working-dir=docroot require drush/drush
+      # - printf '\n%s\n\n' '== ADDING LOCAL DRUSH =='
+      # - composer --working-dir=docroot require drush/drush
 
-      - printf '\n%s\n\n' '== COPY CUSTOM DRUPAL SETTINGS ==='
-      - cp lando/resources/settings.* docroot/web/sites/default/
-      - chown www-data docroot/web/sites/default/settings.*
-      - ls -la docroot/web/sites/default/settings.*
+      # - printf '\n%s\n\n' '== COPY CUSTOM DRUPAL SETTINGS ==='
+      # - cp lando/resources/settings.* docroot/web/sites/default/
+      # - chown www-data docroot/web/sites/default/settings.*
+      # - ls -la docroot/web/sites/default/settings.*
 
-      # finally, use Drush to install Drupal.
+      # Use Drush to install Drupal.
       - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
       - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://${LANDO_APP_NAME}.lndo.site standard
 
       # Fix settings perms, only after install is done.
       # https://www.drupal.org/docs/7/install/step-3-create-settingsphp-and-the-files-directory
-      - chmod 555 docroot/web/sites/default
-      - chmod 444 docroot/web/sites/default/settings.*
+      # - chmod 555 docroot/web/sites/default
+      # - chmod 444 docroot/web/sites/default/settings.*
 
     # After service is up and running.
     run:

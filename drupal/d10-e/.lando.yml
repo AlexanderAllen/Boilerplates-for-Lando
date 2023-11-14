@@ -173,9 +173,6 @@ services:
 
     # Before service runs, as non-root.
     build:
-      # For installs with existing composer.json.
-      # - composer --no-interaction install
-
       # For fresh install with no composer.json
       # https://www.drupal.org/docs/develop/using-composer/manage-dependencies
       - printf '\n%s\n\n' '== SERVING SOME FRESH COMPOSER DEPENDENCIES ==='
