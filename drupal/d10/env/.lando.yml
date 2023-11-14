@@ -34,8 +34,8 @@ proxy:
   appserver:
     - d10.lndo.site
     - d10
-  solr:
-    - solr.d10.lndo.site:8983
+  # solr:
+  #   - solr.d10.lndo.site:8983
   mail:
     - mail.d10.lndo.site
   pma:
@@ -49,13 +49,14 @@ services:
     hogfrom:
       - appserver
 
-  solr:
-    type: solr:8
-    portforward: false
-    port: 8983
-    core: lando
-    config:
-      dir: config/splits/search_api_solr/jump-start/solr8/config-set
+  # Todo 11/14/23 - need fresh configs.
+  # solr:
+  #   type: solr:8
+  #   portforward: false
+  #   port: 8983
+  #   core: lando
+  #   config:
+  #     dir: config/splits/search_api_solr/jump-start/solr8/config-set
 
   # https://hub.docker.com/_/phpmyadmin
   # https://docs.phpmyadmin.net/en/latest/setup.html#customizing-configuration
