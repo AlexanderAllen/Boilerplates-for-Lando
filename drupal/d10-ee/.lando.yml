@@ -11,7 +11,7 @@ config:
 
 env_file:
   - ../resources/default.env
-  - private.env
+  - ./private.env
 
 tooling:
   drush:
@@ -85,6 +85,7 @@ services:
     # https://docs.lando.dev/mariadb/
     type: mariadb:10.6
     portforward: false
+    user: docker
     creds:
       user: drupalX
       password: drupalX
@@ -92,8 +93,21 @@ services:
     config:
       database: ../lando/resources/custom.cnf
     overrides:
+      environment:
+        ALLOW_EMPTY_PASSWORD: yes
       volumes:
-        - ~/dreamy-ritchie/db:/var/lib/mysql
+        # - /home/wsl/dreamy-ritchie/db:/bitnami/mariadb
+        # - /path/to/mariadb-persistence:/bitnami/mariadb
+
+        # Make database persistent.
+        # See https://hub.docker.com/r/bitnami/mariadb for instructions.
+        # For Bitnami/fMariaDB, ensure directory is owned by uid 1001 prior to mounting.
+        - data:/bitnami/mariadb
+
+        # testing
+        - foo:/bitnami/foo
+
+
     build_as_root:
       - apt update -y
       - apt-get install -y xz-utils zip lz4 pv git
@@ -177,5 +191,5 @@ services:
 
       # Use Drush to install Drupal.
       # Shouldn't install db on existing sites, if anything, import it.
-      # - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
-      # - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://${LANDO_APP_NAME}.lndo.site standard
+      - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
+      - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://${LANDO_APP_NAME}.lndo.site standard
