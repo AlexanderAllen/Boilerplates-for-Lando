@@ -170,36 +170,14 @@ services:
       - apt update -y
       - apt-get install -y telnet iputils-ping iproute2
 
-      # Drupal perms are stubborn, cleanup as root for fresh installs.
-      # - printf '\n%s\n\n' '== NUKING DRUPAL FROM ORBIT !!!'
-      # - rm -rf docroot
-
     # Before service runs, as non-root.
     build:
       # For installs with existing composer.json.
       - composer --no-interaction --working-dir=docroot install
 
-      # For fresh install with no composer.json
-      # https://www.drupal.org/docs/develop/using-composer/manage-dependencies
-      # - printf '\n%s\n\n' '== SERVING SOME FRESH COMPOSER DEPENDENCIES ==='
-      # - composer create-project drupal/recommended-project docroot
-
-      # - printf '\n%s\n\n' '== ADDING LOCAL DRUSH =='
-      # - composer --working-dir=docroot require drush/drush
-
-      # - printf '\n%s\n\n' '== COPY CUSTOM DRUPAL SETTINGS ==='
-      # - cp lando/resources/settings.* docroot/web/sites/default/
-      # - chown www-data docroot/web/sites/default/settings.*
-      # - ls -la docroot/web/sites/default/settings.*
-
       # Use Drush to install Drupal.
       - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
       - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://${LANDO_APP_NAME}.lndo.site standard
-
-      # Fix settings perms, only after install is done.
-      # https://www.drupal.org/docs/7/install/step-3-create-settingsphp-and-the-files-directory
-      # - chmod 555 docroot/web/sites/default
-      # - chmod 444 docroot/web/sites/default/settings.*
 
     # After service is up and running.
     run:
