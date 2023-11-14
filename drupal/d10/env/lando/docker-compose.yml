@@ -1,8 +1,0 @@
-version: "3.4"
-
-services:
-  brctvd8-web-lando:
-    image: lando-brctvd8-web:latest
-    build:
-      context: ..
-      dockerfile: lando/lando-brctvd8-web.dockerfile
