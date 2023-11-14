@@ -10,8 +10,8 @@ config:
   composer_version: 2-latest
 
 env_file:
-  - lando/default.env
-  - lando/private.env
+  - ../resources/default.env
+  - private.env
 
 tooling:
   drush:
@@ -72,7 +72,7 @@ services:
       image: phpmyadmin:5.2.1-apache
       command: /docker-entrypoint.sh apache2-foreground
       volumes:
-        - ./lando/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+        - ../lando/resources/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
     build_as_root:
       - apt update
       - apt install -y iputils-ping inetutils-telnet
@@ -90,7 +90,7 @@ services:
       password: drupalX
       database: drupalX
     config:
-      database: lando/custom.cnf
+      database: ../lando/resources/custom.cnf
     build_as_root:
       - apt update -y
       - apt-get install -y xz-utils zip lz4 pv git
@@ -126,7 +126,7 @@ services:
         # Configure external app source.
         - ~/dreamy-ritchie:/app
         # Mount custom scripts on top of custom mount for lando tooling.
-        - ../scripts:/app/lando/
+        - ../lando:/app/lando
 
         # Mount project-specific settings.php (if existing application)
         # Can't mount if creating fresh project (composer wont install)
@@ -136,7 +136,7 @@ services:
         # Mount live php.ini and manually update $LANDO_HOST_IP or $XDEBUG_REMOTE_HOST
         # - lando/mounted.ini:/usr/local/etc/php/conf.d/zzz-mounted.ini
         # DD#9 (internal) - Mount PHPUnit configuration.
-        - lando/phpunit.xml:/app/phpunit.xml
+        # - lando/phpunit.xml:/app/phpunit.xml
 
       tty: true
       # stdin_open: true
@@ -185,7 +185,7 @@ services:
       - composer --working-dir=docroot require drush/drush
 
       - printf '\n%s\n\n' '== COPY CUSTOM DRUPAL SETTINGS ==='
-      - cp lando/settings.* docroot/web/sites/default/
+      - cp lando/resources/settings.* docroot/web/sites/default/
       - chown www-data docroot/web/sites/default/settings.*
       - ls -la docroot/web/sites/default/settings.*
 
