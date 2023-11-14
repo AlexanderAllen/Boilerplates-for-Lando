@@ -1,0 +1,209 @@
+# Boilerplate for Drupal 10
+name: d10
+
+# https://docs.lando.dev/config/drupal9.html#getting-started
+recipe: drupal10
+config:
+  webroot: docroot/web
+
+  # https://docs.lando.dev/php/config.html#installing-composer
+  composer_version: 2-latest
+
+env_file:
+  - lando/default.env
+  - lando/private.env
+
+tooling:
+  drush:
+    description: Executes Drush commands
+    service: appserver
+    cmd: php docroot/vendor/bin/drush --root=docroot/web
+
+  drupal:
+    description: Executes Drupal Console commands
+    service: appserver
+    cmd: php docroot/vendor/bin/drupal --root=docroot/web
+
+  composer:
+    description: Executes composer commands
+    service: appserver
+    cmd: php /usr/local/bin/composer
+    dir: /app/docroot
+
+proxy:
+  appserver:
+    - d10.lndo.site
+    - d10
+  # solr:
+  #   - solr.d10.lndo.site:8983
+  mail:
+    - mail.d10.lndo.site
+  pma:
+    - pma.d10.lndo.site
+
+services:
+
+  mail:
+    # See https://github.com/mailhog/MailHog
+    type: mailhog
+    hogfrom:
+      - appserver
+
+  # Todo 11/14/23 - need fresh configs.
+  # solr:
+  #   type: solr:8
+  #   portforward: false
+  #   port: 8983
+  #   core: lando
+  #   config:
+  #     dir: config/splits/search_api_solr/jump-start/solr8/config-set
+
+  # https://hub.docker.com/_/phpmyadmin
+  # https://docs.phpmyadmin.net/en/latest/setup.html#customizing-configuration
+  pma:
+    type: compose
+    app_mount: false
+    portforward: false
+
+    # Generate a certificate for the container on the proxy.
+    ssl: true
+
+    services:
+      image: phpmyadmin:5.2.1-apache
+      command: /docker-entrypoint.sh apache2-foreground
+      volumes:
+        - ./lando/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+    build_as_root:
+      - apt update
+      - apt install -y iputils-ping inetutils-telnet
+
+  database:
+    # Nov 13, 2023
+    # MariaDB 10.6 is the current long-term maintenance stable version.
+    # The first stable release was in July 2021, and it will be maintained until July 2026.
+    # https://mariadb.com/kb/en/changes-improvements-in-mariadb-106/
+    # https://docs.lando.dev/mariadb/
+    type: mariadb:10.6
+    portforward: false
+    creds:
+      user: drupalX
+      password: drupalX
+      database: drupalX
+    config:
+      database: lando/custom.cnf
+    build_as_root:
+      - apt update -y
+      - apt-get install -y xz-utils zip lz4 pv git
+    run:
+      - mysql -uroot -e "CREATE DATABASE IF NOT EXISTS drupal10_simpletest;"
+      - mysql -uroot -e "GRANT ALL ON drupal10_simpletest.* TO 'drupalX'@'%' WITH GRANT OPTION;"
+
+  memcached:
+    type: memcached:1
+    portforward: false
+    mem: 64
+
+  appserver:
+    # https://docs.lando.dev/config/php.html#supported-versions
+    # https://www.drupal.org/docs/understanding-drupal/how-drupal-9-was-made-and-what-is-included/environment-requirements-of-drupal-9
+    # Drupal 9 requires at least PHP 7.3. PHP 7.4 is also supported but not required. PHP 8 is supported from Drupal 9.1.0.
+    #
+    # November 13, 2023
+    # Drupal 9.5.11 recommends PHP 8.1.6 or higher, "Drupal wants at least 8.0".
+    type: php:8.2
+
+    # Substitute default $cwd app mount with arbitrary external app source.
+    # https://docs.lando.dev/config/services.html#app-mount
+    app_mount: false
+
+    # https://docs.lando.dev/config/php.html#configuration
+    xdebug: "debug,develop,coverage"
+    config:
+      php: lando/php.ini
+
+    overrides:
+      volumes:
+        # Configure external app source.
+        - ../app:/app
+        # Mount custom scripts on top of custom mount for lando tooling.
+        - lando:/app/lando
+
+        # Mount project-specific settings.php (if existing application)
+        # Can't mount if creating fresh project (composer wont install)
+        # - lando/settings.local.php:/opt/settings.local.php
+        # - lando/settings.local.php:/opt/settings.php
+
+        # Mount live php.ini and manually update $LANDO_HOST_IP or $XDEBUG_REMOTE_HOST
+        # - lando/mounted.ini:/usr/local/etc/php/conf.d/zzz-mounted.ini
+        # DD#9 (internal) - Mount PHPUnit configuration.
+        - lando/phpunit.xml:/app/phpunit.xml
+
+      tty: true
+      # stdin_open: true
+      environment:
+        DRUSH_OPTIONS_URI: https://d10.lndo.site
+        COMPOSER_ALLOW_XDEBUG: 1
+        COMPOSER_DISABLE_XDEBUG_WARN: 1
+        # https://docs.lando.dev/config/php.html#configuring-xdebug
+        # https://xdebug.org/docs/all_settings#mode
+        XDEBUG_CONFIG: discover_client_host=false
+
+        # Optional, set XDEBUG_MODE manually.
+        # XDEBUG_MODE: debug,develop,coverage
+
+        # https://alexanderallen.medium.com/visual-studio-code-wsl-running-php-intellisense-from-alpine-linux-on-windows-10-78e8a990f1cc
+        # Set privately via private.env for Windows environments.
+        # XDEBUG_CONNECT_BACK: 0
+        # XDEBUG_REMOTE_HOST: <replace with WSL ipconfig/eth0>
+        # OSX environments may sometimes use:
+        # XDEBUG_REMOTE_HOST: host.docker.internal
+
+    # Before service runs, as root.
+    build_as_root:
+      - addgroup www-data tty
+      - mkdir -p /opt/${LANDO_APP_NAME}/private
+      - chgrp www-data /opt/$LANDO_APP_NAME/private
+      - chmod g+rw /opt/${LANDO_APP_NAME}/private
+      - apt update -y
+      - apt-get install -y telnet iputils-ping iproute2
+
+      # Drupal perms are stubborn, cleanup as root for fresh installs.
+      - printf '\n%s\n\n' '== NUKING DRUPAL FROM ORBIT !!!'
+      - rm -rf docroot
+
+    # Before service runs, as non-root.
+    build:
+      # For installs with existing composer.json.
+      # - composer --no-interaction install
+
+      # For fresh install with no composer.json
+      # https://www.drupal.org/docs/develop/using-composer/manage-dependencies
+      - printf '\n%s\n\n' '== SERVING SOME FRESH COMPOSER DEPENDENCIES ==='
+      - composer create-project drupal/recommended-project docroot
+
+      - printf '\n%s\n\n' '== ADDING LOCAL DRUSH =='
+      - composer --working-dir=docroot require drush/drush
+
+      - printf '\n%s\n\n' '== COPY CUSTOM DRUPAL SETTINGS ==='
+      - cp lando/settings.* docroot/web/sites/default/
+      - chown www-data docroot/web/sites/default/settings.*
+      - ls -la docroot/web/sites/default/settings.*
+
+      # finally, use Drush to install Drupal.
+      - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
+      - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://${LANDO_APP_NAME}.lndo.site standard
+
+      # Fix settings perms, only after install is done.
+      # https://www.drupal.org/docs/7/install/step-3-create-settingsphp-and-the-files-directory
+      - chmod 555 docroot/web/sites/default
+      - chmod 444 docroot/web/sites/default/settings.*
+
+    # After service is up and running.
+    run:
+      - php docroot/vendor/bin/drush --root=docroot/web cron
+
+      - printf '\n%s\n' '== DRUSH SANITY CHECK =='
+      - php docroot/vendor/bin/drush --root=docroot/web status
+
+      - printf '\n%s\n' '== COURTESY ADMIN LOGIN LINK =='
+      - php docroot/vendor/bin/drush --root=docroot/web uli

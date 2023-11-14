@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- CREATE phpunit.xml TO SPECIFY LOCAL SETTINGS -->
+<!-- See documentation: https://phpunit.readthedocs.io/en/7.5/configuration.html# -->
+
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/7.5/phpunit.xsd"
+backupGlobals="false" verbose="true"
+bootstrap="docroot/core/tests/bootstrap.php"
+colors="true" beStrictAboutTestsThatDoNotTestAnything="true"
+beStrictAboutOutputDuringTests="true"
+beStrictAboutChangesToGlobalState="true"
+enforceTimeLimit="true"
+defaultTimeLimit="45"
+>
+    <php>
+        <!-- Set error reporting to E_ALL. -->
+        <ini name="error_reporting" value="32767"/>
+        <!-- Do not limit the amount of memory tests take to run. -->
+        <ini name="memory_limit" value="-1"/>
+        <!-- Example BRCTVD8_BASE_URL value: http://localhost -->
+        <!-- <env name="BRCTVD8_BASE_URL" value="http://brctvd8.local.pencor.com/"/> -->
+        <env name="BRCTVD8_BASE_URL" value="https://brctvd8.lndo.site/"/>
+        <!-- Example SIMPLETEST_BASE_URL value: http://localhost -->
+        <!-- <env name="SIMPLETEST_BASE_URL" value="http://C/"/> -->
+        <env name="SIMPLETEST_BASE_URL" value="https://brctvd8.lndo.site/"/>
+        <!-- Example SIMPLETEST_DB value: mysql://username:password@localhost/databasename#table_prefix -->
+        <!-- <env name="SIMPLETEST_DB" value="mysql://drupal:drupal@brctvd8-db/brctvd8_simpletest"/> -->
+        <env name="SIMPLETEST_DB" value="mysql://drupal9:drupal9@database/drupal9_simpletest"/>
+        <!-- Host for database. -->
+        <env name="DATABASE_HOST" value="database"/>
+        <!-- Username for database access. -->
+        <env name="DATABASE_USER" value="drupal9"/>
+        <!-- Password for database access. -->
+        <env name="DATABASE_PASS" value="drupal9"/>
+        <!-- Name of database. -->
+        <env name="DATABASE_NAME" value="drupal9"/>
+        <!-- Username for user that has API access. -->
+        <env name="API_USER" value="admin"/>
+        <!-- Password for user that has API access. -->
+        <env name="API_PASS" value="Liquid123!"/>
+        <!-- Example BROWSERTEST_OUTPUT_DIRECTORY value: /path/to/webroot/sites/simpletest/browser_output -->
+        <env name="BROWSERTEST_OUTPUT_DIRECTORY" value="docroot/sites/simpletest"/>
+        <!-- Parameters pass to Chromedriver. -->
+        <env name="MINK_DRIVER_ARGS_WEBDRIVER"
+        value='["chrome", {"browserName":"chrome","chromeOptions":{"args":["--disable-gpu","--headless", "--no-sandbox"]}}, "http://chromedriver:4444"]'/>
+    </php>
+    <testsuites>
+        <testsuite name="camp_sports_packages">
+            <directory>docroot/modules/custom/camp/modules/camp_sports_packages/tests</directory>
+        </testsuite>
+        <testsuite name="camp_billing">
+            <directory>docroot/modules/custom/camp/modules/camp_billing/tests</directory>
+        </testsuite>
+        <testsuite name="camp_paperless">
+            <directory>docroot/modules/custom/camp/modules/camp_paperless/tests</directory>
+        </testsuite>
+        <testsuite name="camp_profile">
+            <directory>docroot/modules/custom/camp/modules/camp_profile/tests</directory>
+        </testsuite>
+        <testsuite name="camp_registration">
+            <directory>docroot/modules/custom/camp/modules/camp_registration/tests</directory>
+        </testsuite>
+        <testsuite name="camp_esign">
+            <directory>docroot/modules/custom/camp/modules/camp_esign/tests</directory>
+        </testsuite>
+        <testsuite name="wso2am_client">
+            <directory>docroot/modules/contrib/wso2am_client/tests</directory>
+        </testsuite>
+        <testsuite name="wso2is_auth_client">
+            <directory>docroot/modules/contrib/wso2is_auth_client/tests</directory>
+        </testsuite>
+        <testsuite name="brctv_theme">
+            <directory>docroot/themes/custom/brctv/tests</directory>
+        </testsuite>
+        <testsuite name="psi_jsonapi_denormalizer">
+            <directory>vendor/pencor/psi-jsonapi-denormalizer/tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
