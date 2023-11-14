@@ -15,7 +15,7 @@ $cfg['blowfish_secret'] = 'nm8p94D3ZtcAdoEtYz32sEdka7fsUyQ3';
 
 $cfg['MaxNavigationItems'] = 1000;
 $cfg['NavigationTreeTableSeparator'] = '_';
-$cfg['PmaAbsoluteUri'] = 'https://pma.d10.lndo.site';
+$cfg['PmaAbsoluteUri'] = 'https://pma.d10e.lndo.site';
 
 /**
  * Servers configuration

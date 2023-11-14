@@ -1,4 +1,0 @@
-# http://dl-cdn.alpinelinux.org/alpine/v3.15/main
-# http://dl-cdn.alpinelinux.org/alpine/v3.15/community
-http://dl-cdn.alpinelinux.org/alpine/edge/main
-http://dl-cdn.alpinelinux.org/alpine/edge/community

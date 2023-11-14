@@ -1,5 +1,5 @@
 # Boilerplate for Drupal 10
-name: d10
+name: d10e
 
 # https://docs.lando.dev/config/drupal9.html#getting-started
 recipe: drupal10
@@ -32,14 +32,14 @@ tooling:
 
 proxy:
   appserver:
-    - d10.lndo.site
+    - d10e.lndo.site
     - d10
   # solr:
   #   - solr.d10.lndo.site:8983
   mail:
-    - mail.d10.lndo.site
+    - mail.d10e.lndo.site
   pma:
-    - pma.d10.lndo.site
+    - pma.d10e.lndo.site
 
 services:
 
@@ -124,7 +124,7 @@ services:
     overrides:
       volumes:
         # Configure external app source.
-        - ../app:/app
+        - ~/dreamy-ritchie:/app
         # Mount custom scripts on top of custom mount for lando tooling.
         - lando:/app/lando
 
@@ -141,7 +141,7 @@ services:
       tty: true
       # stdin_open: true
       environment:
-        DRUSH_OPTIONS_URI: https://d10.lndo.site
+        DRUSH_OPTIONS_URI: https://d10e.lndo.site
         COMPOSER_ALLOW_XDEBUG: 1
         COMPOSER_DISABLE_XDEBUG_WARN: 1
         # https://docs.lando.dev/config/php.html#configuring-xdebug
@@ -202,8 +202,9 @@ services:
     run:
       - php docroot/vendor/bin/drush --root=docroot/web cron
 
-      - printf '\n%s\n' '== DRUSH SANITY CHECK =='
+      - printf '\n%s\n' '== DRUSH SANITY CHECK FOR ${LANDO_APP_NAME} =='
       - php docroot/vendor/bin/drush --root=docroot/web status
 
-      - printf '\n%s\n' '== COURTESY ADMIN LOGIN LINK =='
+      - printf '\n%s\n' '== WELCOME TO ${LANDO_APP_NAME} =='
+      - printf '\n%s\n' 'YOUR ONE-TIME USE ADMIN LOGIN LINK IS:'
       - php docroot/vendor/bin/drush --root=docroot/web uli
