@@ -126,7 +126,7 @@ services:
         # Configure external app source.
         - ~/dreamy-ritchie:/app
         # Mount custom scripts on top of custom mount for lando tooling.
-        - lando:/app/lando
+        - ../scripts:/app/lando/
 
         # Mount project-specific settings.php (if existing application)
         # Can't mount if creating fresh project (composer wont install)
