@@ -38,8 +38,8 @@ proxy:
     - solr.d10.lndo.site:8983
   mail:
     - mail.d10.lndo.site
-  # pma:
-  #   - d10.pma.lndo.site
+  pma:
+    - pma.d10.lndo.site
 
 services:
 
@@ -59,22 +59,22 @@ services:
 
   # https://hub.docker.com/_/phpmyadmin
   # https://docs.phpmyadmin.net/en/latest/setup.html#customizing-configuration
-  # pma:
-  #   type: compose
-  #   app_mount: false
-  #   portforward: false
+  pma:
+    type: compose
+    app_mount: false
+    portforward: false
 
-  #   # Generate a certificate for the container on the proxy.
-  #   ssl: true
+    # Generate a certificate for the container on the proxy.
+    ssl: true
 
-  #   services:
-  #     image: phpmyadmin:5.1.1-apache
-  #     command: /docker-entrypoint.sh apache2-foreground
-  #     volumes:
-  #       - ./lando/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
-  #   build_as_root:
-  #     - apt update
-  #     - apt install -y iputils-ping inetutils-telnet
+    services:
+      image: phpmyadmin:5.2.1-apache
+      command: /docker-entrypoint.sh apache2-foreground
+      volumes:
+        - ./lando/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+    build_as_root:
+      - apt update
+      - apt install -y iputils-ping inetutils-telnet
 
   database:
     # Nov 13, 2023
