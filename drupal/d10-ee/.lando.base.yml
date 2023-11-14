@@ -7,6 +7,10 @@ events:
   # post-start:
   #   - appserver: netstat -nr | grep '^0\.0\.0\.0' | awk '{print $2}' > /opt/$LANDO_APP_PROJECT/XDEBUG_REMOTE_HOST
   post-start:
+    - appserver: printf '\n%s\n' "== DRUSH SANITY CHECK FOR ${LANDO_APP_NAME} =="
+    - appserver: php docroot/vendor/bin/drush --root=docroot/web status
+    - appserver: php docroot/vendor/bin/drush --root=docroot/web cron
+    - appserver: printf '\n%s\n\n' "== WELCOME TO ${LANDO_APP_NAME} =="
     - appserver: printf '\n%s\n' 'YOUR ONE-TIME USE ADMIN LOGIN LINK IS:'
     - appserver: php docroot/vendor/bin/drush --root=docroot/web uli
 
