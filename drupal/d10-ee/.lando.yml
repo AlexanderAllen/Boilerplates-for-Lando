@@ -11,7 +11,7 @@ config:
 
 env_file:
   - ../resources/default.env
-  - ./private.env
+  - private.env
 
 tooling:
   drush:
@@ -34,8 +34,8 @@ proxy:
   appserver:
     - d10ee.lndo.site
     - d10
-  # solr:
-  #   - solr.d10.lndo.site:8983
+  solr:
+    - solr.d10.lndo.site:8983
   mail:
     - mail.d10ee.lndo.site
   # pma:
@@ -49,14 +49,20 @@ services:
     hogfrom:
       - appserver
 
-  # Todo 11/14/23 - need fresh configs.
-  # solr:
-  #   type: solr:8
-  #   portforward: false
-  #   port: 8983
-  #   core: lando
-  #   config:
-  #     dir: config/splits/search_api_solr/jump-start/solr8/config-set
+  solr:
+    type: solr:8
+    # Don't use default app_mount on external apps.
+    app_mount: false
+    portforward: false
+    # port: 8983
+    core: lando
+    overrides:
+      volumes:
+      - ~/dreamy-ritchie:/app
+    build:
+      - rm -rf /var/solr/data/lando/conf
+      - ln -s /app/docroot/web/modules/contrib/search_api_solr/jump-start/solr8/config-set /var/solr/data/lando/conf
+
 
   # https://hub.docker.com/_/phpmyadmin
   # https://docs.phpmyadmin.net/en/latest/setup.html#customizing-configuration
@@ -91,35 +97,6 @@ services:
       database: drupalX
     config:
       database: ../lando/resources/custom.cnf
-    overrides:
-      environment:
-        ALLOW_EMPTY_PASSWORD: yes
-        DATABASE_VOLUME: /bitnami/foo
-      volumes:
-        # - /home/wsl/dreamy-ritchie/db:/bitnami/mariadb
-        # - /path/to/mariadb-persistence:/bitnami/mariadb
-
-        # Make database persistent.
-        # See https://hub.docker.com/r/bitnami/mariadb for instructions.
-        # For Bitnami/fMariaDB, ensure directory is owned by uid 1001 prior to mounting.
-        # - data:/bitnami/mariadb
-
-        # testing
-        - foo:/opt/foo:Z
-
-
-    build_as_root:
-      # - apt update -y
-      # - apt-get install -y xz-utils zip lz4 pv git
-      # Set up permissions for database persistence via shared volumes.
-      # For WSL users this is g/uid 1000.
-      # hopefully this runs after all of lando's stupid hooks
-      # but might run too late, after mariadb install (probably)
-      # check events in that case
-      - adduser --no-create-home --disabled-login --system --uid 1001 --ingroup www-data mariadb
-      - chown -R mariadb:1000 /opt/foo
-      - chmod -R ug+rwx /opt/foo
-
 
     run:
       - mysql -uroot -e "CREATE DATABASE IF NOT EXISTS drupal10_simpletest;"
@@ -201,5 +178,5 @@ services:
 
       # Use Drush to install Drupal.
       # Shouldn't install db on existing sites, if anything, import it.
-      - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
-      - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://${LANDO_APP_NAME}.lndo.site standard
+      # - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
+      # - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://${LANDO_APP_NAME}.lndo.site standard
