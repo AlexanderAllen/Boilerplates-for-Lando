@@ -85,7 +85,6 @@ services:
     # https://docs.lando.dev/mariadb/
     type: mariadb:10.6
     portforward: false
-    user: docker
     creds:
       user: drupalX
       password: drupalX
@@ -95,6 +94,7 @@ services:
     overrides:
       environment:
         ALLOW_EMPTY_PASSWORD: yes
+        DATABASE_VOLUME: /bitnami/foo
       volumes:
         # - /home/wsl/dreamy-ritchie/db:/bitnami/mariadb
         # - /path/to/mariadb-persistence:/bitnami/mariadb
@@ -102,15 +102,25 @@ services:
         # Make database persistent.
         # See https://hub.docker.com/r/bitnami/mariadb for instructions.
         # For Bitnami/fMariaDB, ensure directory is owned by uid 1001 prior to mounting.
-        - data:/bitnami/mariadb
+        # - data:/bitnami/mariadb
 
         # testing
-        - foo:/bitnami/foo
+        - foo:/opt/foo:Z
 
 
     build_as_root:
-      - apt update -y
-      - apt-get install -y xz-utils zip lz4 pv git
+      # - apt update -y
+      # - apt-get install -y xz-utils zip lz4 pv git
+      # Set up permissions for database persistence via shared volumes.
+      # For WSL users this is g/uid 1000.
+      # hopefully this runs after all of lando's stupid hooks
+      # but might run too late, after mariadb install (probably)
+      # check events in that case
+      - adduser --no-create-home --disabled-login --system --uid 1001 --ingroup www-data mariadb
+      - chown -R mariadb:1000 /opt/foo
+      - chmod -R ug+rwx /opt/foo
+
+
     run:
       - mysql -uroot -e "CREATE DATABASE IF NOT EXISTS drupal10_simpletest;"
       - mysql -uroot -e "GRANT ALL ON drupal10_simpletest.* TO 'drupalX'@'%' WITH GRANT OPTION;"
