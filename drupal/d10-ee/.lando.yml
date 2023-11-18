@@ -54,7 +54,7 @@ services:
     # Don't use default app_mount on external apps.
     app_mount: false
     portforward: false
-    # port: 8983
+    port: 8983
     core: lando
     overrides:
       volumes:
@@ -176,7 +176,14 @@ services:
       # For installs with existing composer.json.
       - composer --no-interaction --working-dir=docroot install
 
+      # It would be nice to have a script autodetect if the database is installed or not
+      # maybe drush status json pipe into jq.
+      # in not installed then install?
+
       # Use Drush to install Drupal.
       # Shouldn't install db on existing sites, if anything, import it.
       # - printf '\n%s\n\n' '== SO ANYWAYS, I STARTED INSTALLING DRUPAL AWAY... =='
-      # - php docroot/vendor/bin/drush --root=docroot/web site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://${LANDO_APP_NAME}.lndo.site standard
+      # - php docroot/vendor/bin/drush --root=docroot/web --db-url=mysql://drupalX:drupalX@database:3306/drupalX  site:install --yes --site-name=${LANDO_APP_NAME} --account-pass=admin --uri=https://${LANDO_APP_NAME}.lndo.site standard
+      # - php docroot/vendor/bin/drush --root=docroot/web pm-enable -y search_api search_api_solr
+
+#  --db-url=mysql://drupalX:drupalX@database:3306/drupalX

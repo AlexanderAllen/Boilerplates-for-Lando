@@ -1,93 +1,14 @@
 # By default, event commands will run on the appserver service
 # https://docs.lando.dev/core/v3/events.html
 events:
-
-  # Engine events don't seem to run on on database containers.
-  # pre-bootstrap-config:
-  #   - database: printf '\nEVENT - %s\n\n' "post-bootstrap-config"
-  #   - database: touch /opt/foo/pre-bootstrap-config
-  # pre-bootstrap-tasks:
-  #   - database: printf '\nEVENT - %s\n\n' "pre-bootstrap-tasks"
-  #   - database: touch /opt/foo/pre-bootstrap-tasks
-  # pre-bootstrap-engine:
-  #   - database: printf '\nEVENT - %s\n\n' "pre-bootstrap-engine"
-  #   - database: touch /opt/foo/pre-bootstrap-engine
-  # pre-bootstrap-app:
-  #   - database: printf '\nEVENT - %s\n\n' "pre-bootstrap-app"
-  #   - database: touch /opt/foo/pre-bootstrap-app
-  # post-bootstrap-config:
-  #   - database: printf '\nEVENT - %s\n\n' "post-bootstrap-config"
-  #   - database: touch /opt/foo/post-bootstrap-config
-  # post-bootstrap-engine:
-  #   - database: printf '\nEVENT - %s\n\n' "post-bootstrap-engine"
-  #   - database: touch /opt/foo/post-bootstrap-engine
-  # post-bootstrap-app:
-  #   - database: printf '\nEVENT - %s\n\n' "post-bootstrap-app"
-  #   - database: touch /opt/foo/post-bootstrap-app
-
-  ##
-  ## APP EVENTS
-  ##
-
-  # Engine events don't seem to run on on database containers.
-  # pre-destroy:
-  #   - database: printf '\nEVENT - %s\n\n' "pre-destroy"
-  #   - database: touch /opt/foo/pre-destroy
-  # post-destroy:
-  #   - database: printf '\nEVENT - %s\n\n' "post-destroy"
-  #   - database: touch /opt/foo/post-destroy
-  # pre-init:
-  #   - database: printf '\nEVENT - %s\n\n' "pre-init"
-  #   - database: touch /opt/foo/pre-init
-  # post-init:
-  #   - database: printf '\nEVENT - %s\n\n' "post-init"
-  #   - database: touch /opt/foo/post-init
-  # pre-rebuild:
-  #   - database: printf '\nEVENT - %s\n\n' "pre-rebuild"
-  #   - database: touch /opt/foo/pre-rebuild
-  # post-rebuild:
-  #   - database: printf '\nEVENT - %s\n\n' "post-rebuild"
-  #   - database: touch /opt/foo/post-rebuild
-
-  pre-start:
-    - database: printf '\nEVENT - %s\n\n' "pre-start"
-    - database: touch /opt/foo/pre-start
-    # Runs as non-root user, so this won't work.
-    # - database: adduser --no-create-home --disabled-login --uid 1001 --ingroup www-data mariadb
-
-
   post-start:
-    - database: printf '\nEVENT - %s\n\n' "post-start"
-    - database: touch /opt/foo/post-start
-
     - appserver: printf '\n%s\n' "== DRUSH SANITY CHECK FOR ${LANDO_APP_NAME} =="
     - appserver: php docroot/vendor/bin/drush --root=docroot/web status
     - appserver: php docroot/vendor/bin/drush --root=docroot/web cron
 
-  # ready:
-  #   - appserver: printf '\n%s\n\n' "== WELCOME TO ${LANDO_APP_NAME} =="
-  #   - appserver: printf '\n%s\n' 'YOUR ONE-TIME USE ADMIN LOGIN LINK IS:'
-  #   - appserver: php docroot/vendor/bin/drush --root=docroot/web uli
-
-
-
-
-
-
-    # MariaDB uses uid 1001, but Lando sets uid to the user running Lando (1000 in WSL).
-    # Give MariaDB perms to use uid 1000 resources.
-    # - database: printf '\n%s\n\n' "== SETTING DATABASE VOLUME PERMS FOR uid 1001 =="
-    # - database: adduser --no-create-home --disabled-login --uid 1001 --ingroup www-data mariadb
-    # # - database: printf '\nCurrent id is %s\n\n' `id`
-    # # - database: adduser --disabled-password --uid 1000 landouser
-    # - database: chown -R 1001:1000  ${DATABASE_VOLUME}
-    # - database: chmod -R ug+rwx ${DATABASE_VOLUME}
-
-#  sudo adduser \
-# --no-create-home \
-# --disabled-password \
-# --gecos "User for Bitnami Docker images." \
-# --uid 1002 \
+    - appserver: printf '\n%s\n\n' "== WELCOME TO ${LANDO_APP_NAME} =="
+    - appserver: printf '\n%s\n' 'YOUR ONE-TIME USE ADMIN LOGIN LINK IS:'
+    - appserver: php docroot/vendor/bin/drush --root=docroot/web uli
 
 tooling:
 
