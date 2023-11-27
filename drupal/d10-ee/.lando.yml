@@ -34,34 +34,34 @@ proxy:
   appserver:
     - d10ee.lndo.site
     - d10
-  solr:
-    - solr.d10.lndo.site:8983
-  mail:
-    - mail.d10ee.lndo.site
+  # solr:
+  #   - solr.d10.lndo.site:8983
+  # mail:
+  #   - mail.d10ee.lndo.site
   # pma:
   #   - pma.d10ee.lndo.site
 
 services:
 
-  mail:
-    # See https://github.com/mailhog/MailHog
-    type: mailhog
-    hogfrom:
-      - appserver
+  # mail:
+  #   # See https://github.com/mailhog/MailHog
+  #   type: mailhog
+  #   hogfrom:
+  #     - appserver
 
-  solr:
-    type: solr:8
-    # Don't use default app_mount on external apps.
-    app_mount: false
-    portforward: false
-    port: 8983
-    core: lando
-    overrides:
-      volumes:
-      - ~/dreamy-ritchie:/app
-    build:
-      - rm -rf /var/solr/data/lando/conf
-      - ln -s /app/docroot/web/modules/contrib/search_api_solr/jump-start/solr8/config-set /var/solr/data/lando/conf
+  # solr:
+  #   type: solr:8
+  #   # Don't use default app_mount on external apps.
+  #   app_mount: false
+  #   portforward: false
+  #   port: 8983
+  #   core: lando
+  #   overrides:
+  #     volumes:
+  #     - ~/dreamy-ritchie:/app
+  #   build:
+  #     - rm -rf /var/solr/data/lando/conf
+  #     - ln -s /app/docroot/web/modules/contrib/search_api_solr/jump-start/solr8/config-set /var/solr/data/lando/conf
 
 
   # https://hub.docker.com/_/phpmyadmin
@@ -98,6 +98,13 @@ services:
     config:
       database: ../lando/resources/custom.cnf
 
+    environment:
+      MARIADB_ENABLE_SLOW_QUERY: 1
+      MARIADB_LONG_QUERY_TIME: 2
+    overrides:
+      volumes:
+        - ~/dreamy-ritchie/logs:/opt/logs
+
     run:
       - mysql -uroot -e "CREATE DATABASE IF NOT EXISTS drupal10_simpletest;"
       - mysql -uroot -e "GRANT ALL ON drupal10_simpletest.* TO 'drupalX'@'%' WITH GRANT OPTION;"
@@ -123,14 +130,14 @@ services:
     # https://docs.lando.dev/config/php.html#configuration
     xdebug: "debug,develop,coverage"
     config:
-      php: lando/php.ini
+      php: ../lando/resources/php.ini
 
     overrides:
       volumes:
         # Configure external app source.
         - ~/dreamy-ritchie:/app
         # Mount custom scripts on top of custom mount for lando tooling.
-        - ../lando:/app/lando
+        # - ../lando:/app/lando
 
         # Mount project-specific settings.php (if existing application)
         # Can't mount if creating fresh project (composer wont install)
@@ -139,6 +146,7 @@ services:
 
         # Mount live php.ini and manually update $LANDO_HOST_IP or $XDEBUG_REMOTE_HOST
         # - lando/mounted.ini:/usr/local/etc/php/conf.d/zzz-mounted.ini
+        # - ../lando/resources/php.ini:/usr/local/etc/php/conf.d/zzz-mounted.ini
         # DD#9 (internal) - Mount PHPUnit configuration.
         # - lando/phpunit.xml:/app/phpunit.xml
 
@@ -170,6 +178,12 @@ services:
       - chmod g+rw /opt/${LANDO_APP_NAME}/private
       - apt update -y
       - apt-get install -y telnet iputils-ping iproute2
+
+      # Development utilities.
+      # ext-pcov: PHP extension that provides line coverage
+      - pecl install pcov
+      # - docker-php-ext-install pcov
+      - docker-php-ext-enable pcov
 
     # Before service runs, as non-root.
     build:
