@@ -161,5 +161,18 @@ tooling:
 
   phpunit:
     description: Invokes PHPUnit binary.
+    dir: /app
     cmd:
-      - appserver: vendor/bin/phpunit
+      - appserver: php /app/docroot/vendor/bin/phpunit
+
+  phpstan:
+    description: Invokes PHPStan.
+    dir: /app/docroot
+    cmd:
+      - appserver: php /app/docroot/vendor/bin/phpstan
+
+  psysh:
+    description: Invokes PSYSH.
+    dir: /app/docroot
+    cmd:
+      - appserver: php /app/docroot/vendor/bin/psysh
