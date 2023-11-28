@@ -161,9 +161,9 @@ tooling:
 
   phpunit:
     description: Invokes PHPUnit binary.
-    dir: /app
+    dir: /app/docroot
     cmd:
-      - appserver: php /app/docroot/vendor/bin/phpunit
+      - appserver: php vendor/bin/phpunit  --testdox web/modules/custom
 
   phpstan:
     description: Invokes PHPStan.
