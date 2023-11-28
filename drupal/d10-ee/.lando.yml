@@ -177,13 +177,15 @@ services:
       - chgrp www-data /opt/$LANDO_APP_NAME/private
       - chmod g+rw /opt/${LANDO_APP_NAME}/private
       - apt update -y
-      - apt-get install -y telnet iputils-ping iproute2
-
-      # Development utilities.
-      # ext-pcov: PHP extension that provides line coverage
+      - apt-get install -y telnet iputils-ping iproute2 lsb-release
+      - echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php-sury.list
       - pecl install pcov
-      # - docker-php-ext-install pcov
       - docker-php-ext-enable pcov
+
+      # PHP docs.
+      - mkdir /usr/local/share/psysh/
+      - wget http://psysh.org/manual/en/php_manual.sqlite -O /usr/local/share/psysh/php_manual.sqlite
+      - chown www-data /usr/local/share/psysh/php_manual.sqlite
 
     # Before service runs, as non-root.
     build:
