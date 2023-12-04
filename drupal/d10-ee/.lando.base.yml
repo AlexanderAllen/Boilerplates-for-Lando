@@ -163,7 +163,13 @@ tooling:
     description: Invokes PHPUnit binary.
     dir: /app/docroot
     cmd:
-      - appserver: php vendor/bin/phpunit  --testdox web/modules/custom
+      - appserver: php vendor/bin/phpunit  --testdox web/modules/custom --exclude-group ignore
+
+  phpunitdd:
+    description: Debug PHPUnit
+    dir: /app/docroot
+    cmd:
+      - appserver: export XDEBUG_CONFIG="idekey=VSCODE" && php vendor/bin/phpunit web/modules/custom --testdox --exclude-group ignore
 
   phpstan:
     description: Invokes PHPStan.
