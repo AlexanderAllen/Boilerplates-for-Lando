@@ -163,13 +163,24 @@ tooling:
     description: Invokes PHPUnit binary.
     dir: /app/docroot
     cmd:
-      - appserver: php vendor/bin/phpunit  --testdox web/modules/custom --exclude-group ignore
+      - appserver: vendor/bin/phpunit web/modules/contrib/musica/tests --testdox --exclude-group ignore --verbose
 
+  # Ok so this script is running phpunit from the drupal core vendor, assuming it's there.
+  # Do I really want to do that? I know it works for sure, but...
+  # Can it be split? into tooling?
   phpunitdd:
     description: Debug PHPUnit
     dir: /app/docroot
     cmd:
-      - appserver: export XDEBUG_CONFIG="idekey=VSCODE" && php vendor/bin/phpunit web/modules/custom --testdox --exclude-group ignore
+      - appserver: export XDEBUG_CONFIG="idekey=VSCODE" && vendor/bin/phpunit web/modules/contrib/musica/tests --testdox --exclude-group ignore --verbose
+
+  # Call PHPUnit from the directory that contains Drupal core /vendor.
+  # It's where bootstrap.php expects to be called from.
+  test:
+    description: Debug PHPUnit
+    dir: /app/docroot
+    cmd:
+      - appserver: web/modules/contrib/musica/tools/phpunit/local-v9/lando
 
   phpstan:
     description: Invokes PHPStan.
