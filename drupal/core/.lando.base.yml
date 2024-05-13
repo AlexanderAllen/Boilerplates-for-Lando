@@ -1,0 +1,191 @@
+# By default, event commands will run on the appserver service
+# https://docs.lando.dev/core/v3/events.html
+events:
+  post-start:
+    - appserver: printf '\n%s\n' "== DRUSH SANITY CHECK FOR ${LANDO_APP_NAME} =="
+    - appserver: php ${DRUPAL_VENDOR}/drush --root=${DRUPAL_ROOT} status
+    - appserver: php ${DRUPAL_VENDOR}/drush --root=${DRUPAL_ROOT} cron
+
+    - appserver: printf '\n%s\n\n' "== WELCOME TO ${LANDO_APP_NAME} =="
+    - appserver: printf '\n%s\n' 'YOUR ONE-TIME USE ADMIN LOGIN LINK IS:'
+    - appserver: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} uli
+
+tooling:
+
+  login:
+    description: Creates a regular login link
+    service: appserver
+    dir: /app
+    cmd:
+      - echo "Logging you into ${DRUSH_OPTIONS_URI}"
+      - php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} cache:rebuild
+      - php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} uli --uid=2
+
+  admin:
+    description: Creates a root login link
+    service: appserver
+    cmd:
+      - appserver: ./lando/scripts/user-reset.sh
+
+  console:
+    description: Open an interactive shell for Drupal
+    service: appserver
+    cmd:
+      - php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} php:cli
+
+  watchdog:
+    description: Displays most recent watchdog messages
+    service: appserver
+    cmd: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} wd-show
+
+  install:
+    description: Install a fresh Drupal database
+    service: appserver
+    dir: /app/docroot
+    cmd:
+      - php `${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} site-install --yes --db-url=mysql://${APP_DB_ROOTUSER}@database:3306/${APP_DB_NAME}
+        --db-su=${APP_DB_USER}
+        --db-su-pw=${APP_DB_PASS}
+        --account-name="admin"
+        --account-pass="admin"
+        --uri=${DRUSH_OPTIONS_URI}
+        --site-name="boilerplate-d9"
+        standard`
+
+  nuke:
+    description: Nuke Composer vendor dependencies
+    service: appserver
+    dir: /app
+    cmd:
+      - bash -c "echo ''"
+      - bash -c "echo '=== NUKE COMPOER DEPS ==='"
+      # Git is ignoring lockfile.
+      - rm composer.lock
+      - rm -rf vendor
+      # Nuking cache may trigger packagist throttling.
+      - composer clear-cache
+
+  db-connect:
+    description: Connects to the database service
+    service: database
+    cmd: mysql --user=${APP_DB_ROOTUSER}
+
+  db-create:
+    description: Creates the default database
+    service: database
+    cmd: mysql --verbose --user=${APP_DB_ROOTUSER} --execute="create database ${APP_DB_NAME}"
+
+  db-drop:
+    description: Drops the default database
+    service: database
+    cmd: mysql --verbose --user=${APP_DB_ROOTUSER} --execute="drop database ${APP_DB_NAME}"
+
+  db-show:
+    description: Shows databases
+    service: database
+    cmd: mysql --user=${APP_DB_ROOTUSER} --execute="show databases;"
+
+  db-tables:
+    description: Shows tables for the default Lando database
+    service: database
+    cmd: mysql --verbose --user=${APP_DB_ROOTUSER} --execute="use ${APP_DB_NAME}; show tables;"
+
+  db-truncate:
+    description: Truncate all tables on default database
+    service: database
+    dir: /app/db
+    cmd: mysql --user=${APP_DB_ROOTUSER} --skip-column-names --silent --execute='show tables;' ${APP_DB_NAME} |
+      while read table; do mysql --user=${APP_DB_ROOTUSER} --execute="truncate table $table" ${APP_DB_NAME}; done
+
+  db-import-plain:
+    description: Import plain sql dump
+    dir: /app/db
+    cmd:
+      - database: echo "Importing `ls -Art *.sql | tail -n 1`"
+      - database: |
+          mysql --user=${APP_DB_USER} --password=${APP_DB_PASS} ${APP_DB_NAME}
+          < `ls -Art *.sql | tail -n 1`
+      - appserver: ../lando/scripts/user-reset.sh
+      - appserver: ../lando/scripts/schema-updates.sh
+
+  schema-updates:
+    description: Run schema updates after an import.
+    cmd:
+      - appserver: ./lando/scripts/schema-updates.sh
+      - appserver: ./lando/scripts/user-reset.sh
+
+  salt:
+    description: Generate settings.php hash_salt
+    dir: /app
+    cmd:
+      - appserver: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} php-eval 'echo \Drupal\Component\Utility\Crypt::randomBytesBase64(55)' > /opt/${LANDO_APP_NAME}/private/salt.txt
+
+  # Windows services like to use .zip sometimes (Azure).
+  db-import-zip:
+    description: Import .zip-formatted db dump
+    service: database
+    dir: /app/db
+    cmd: |
+      echo "Importing `ls -Art *.zip | tail -n 1`" \
+      "unzip -p `ls -Art *.zip | tail -n 1` |
+      mysql --user=${APP_DB_USER} --password=${APP_DB_PASS} ${APP_DB_NAME}"
+
+  db-import-xz:
+    description: Import the most recent XZ (LZMA, Liv-Ziv-Markov) compressed dump into the default database
+    service: database
+    dir: /app/db
+    cmd: |
+      echo "Importing `ls -Art *.xz | tail -n 1`" \
+      "xz --decompress --stdout `ls -Art *.xz | tail -n 1` |
+      mysql --user=${APP_DB_USER} --password=${APP_DB_PASS} ${APP_DB_NAME}"
+
+  db-dump:
+    description: Same as Lando db-export, but with timestamp.
+    cmd:
+      - appserver: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} cr
+      - database: lando/scripts/dump.sh
+
+  solr-config:
+    description: Exports Drupal's Solr config into local filesystem.
+    service: appserver
+    dir: /app
+    cmd:
+      - php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} search-api-solr:get-server-config lando config/search_api_solr/download/get-server-config.zip
+      - unzip -o config/search_api_solr/download/get-server-config.zip -d config/search_api_solr/download/get-server-config
+
+  dd:
+    description: Debug a Drush command with XDebug.
+    cmd:
+      - appserver: lando/scripts/dd.sh
+
+  phpunit:
+    description: Invokes PHPUnit binary.
+    dir: /app/docroot
+    cmd:
+      - appserver: vendor/bin/phpunit web/modules/contrib/musica/tests --testdox --exclude-group ignore --verbose
+
+  phpunitdd:
+    description: Debug PHPUnit
+    dir: /app/docroot
+    cmd:
+      - appserver: export XDEBUG_CONFIG="idekey=VSCODE" && vendor/bin/phpunit web/modules/contrib/musica/tests --testdox --exclude-group ignore --verbose
+
+  # Call PHPUnit from the directory that contains Drupal core /vendor.
+  # It's where bootstrap.php expects to be called from.
+  test:
+    description: Debug PHPUnit
+    dir: /app/docroot
+    cmd:
+      - appserver: web/modules/contrib/musica/tools/phpunit/local-v9/lando
+
+  phpstan:
+    description: Invokes PHPStan.
+    dir: /app/docroot
+    cmd:
+      - appserver: php /app/docroot/vendor/bin/phpstan
+
+  psysh:
+    description: Invokes PSYSH.
+    dir: /app/docroot
+    cmd:
+      - appserver: php /app/docroot/vendor/bin/psysh

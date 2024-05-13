@@ -1,0 +1,133 @@
+# Boilerplate for Drupal 10 projects with existing external source code.
+name: core
+
+# https://docs.lando.dev/config/drupal9.html#getting-started
+recipe: drupal10
+config:
+  webroot: docroot
+
+  # https://docs.lando.dev/php/config.html#installing-composer
+  composer_version: 2-latest
+
+env_file:
+  - ../resources/default.env
+  - private.env
+
+tooling:
+  drush:
+    description: Executes Drush commands
+    service: appserver
+    cmd: php vendor/bin/drush --root=/app/docroot
+
+  drupal:
+    description: Executes Drupal Console commands
+    service: appserver
+    cmd: php vendor/bin/drupal --root=/app/docroot
+
+  composer:
+    description: Executes composer commands
+    service: appserver
+    cmd: php /usr/local/bin/composer
+    dir: /app/docroot
+
+proxy:
+  appserver:
+    - core.lndo.site
+
+services:
+
+  database:
+    # Nov 13, 2023
+    # MariaDB 10.6 is the current long-term maintenance stable version.
+    # The first stable release was in July 2021, and it will be maintained until July 2026.
+    # https://mariadb.com/kb/en/changes-improvements-in-mariadb-106/
+    # https://docs.lando.dev/mariadb/
+    type: mariadb:10.6
+    portforward: true
+    creds:
+      user: drupalX
+      password: drupalX
+      database: drupalX
+    config:
+      database: ../lando/resources/custom.cnf
+
+    environment:
+      MARIADB_ENABLE_SLOW_QUERY: 1
+      MARIADB_LONG_QUERY_TIME: 2
+    overrides:
+      volumes:
+        - ~/dreamy-ritchie/logs:/opt/logs
+
+    run:
+      - mysql -uroot -e "CREATE DATABASE IF NOT EXISTS drupal10_simpletest;"
+      - mysql -uroot -e "GRANT ALL ON drupal10_simpletest.* TO 'drupalX'@'%' WITH GRANT OPTION;"
+
+  memcached:
+    type: memcached:1
+    portforward: false
+    mem: 64
+
+  appserver:
+    # https://docs.lando.dev/config/php.html#supported-versions
+    # https://www.drupal.org/docs/understanding-drupal/how-drupal-9-was-made-and-what-is-included/environment-requirements-of-drupal-9
+    # Drupal 9 requires at least PHP 7.3. PHP 7.4 is also supported but not required. PHP 8 is supported from Drupal 9.1.0.
+    #
+    # November 13, 2023
+    # Drupal 9.5.11 recommends PHP 8.1.6 or higher, "Drupal wants at least 8.0".
+    type: php:8.2
+
+    # Substitute default $cwd app mount with arbitrary external app source.
+    # https://docs.lando.dev/config/services.html#app-mount
+    app_mount: false
+
+    # https://docs.lando.dev/config/php.html#configuration
+    xdebug: "debug,develop,coverage"
+    config:
+      php: ../lando/resources/php.ini
+
+    overrides:
+      volumes:
+        # Configure external app source.
+        - ~/core:/app
+
+      tty: true
+      # stdin_open: true
+      environment:
+        DRUSH_OPTIONS_URI: https://core.lndo.site
+        COMPOSER_ALLOW_XDEBUG: 1
+        COMPOSER_DISABLE_XDEBUG_WARN: 1
+        # https://docs.lando.dev/config/php.html#configuring-xdebug
+        # https://xdebug.org/docs/all_settings#mode
+        XDEBUG_CONFIG: discover_client_host=false
+
+        # Optional, set XDEBUG_MODE manually.
+        # XDEBUG_MODE: debug,develop,coverage
+
+        # https://alexanderallen.medium.com/visual-studio-code-wsl-running-php-intellisense-from-alpine-linux-on-windows-10-78e8a990f1cc
+        # Set privately via private.env for Windows environments.
+        # XDEBUG_CONNECT_BACK: 0
+        # XDEBUG_REMOTE_HOST: <replace with WSL ipconfig/eth0>
+        # OSX environments may sometimes use:
+        # XDEBUG_REMOTE_HOST: host.docker.internal
+
+    # Before service runs, as root.
+    build_as_root:
+      - addgroup www-data tty
+      - mkdir -p /opt/${LANDO_APP_NAME}/private
+      - chgrp www-data /opt/$LANDO_APP_NAME/private
+      - chmod g+rw /opt/${LANDO_APP_NAME}/private
+      - apt update -y
+      - apt-get install -y telnet iputils-ping iproute2 lsb-release
+      - echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php-sury.list
+      - pecl install pcov
+      - docker-php-ext-enable pcov
+
+      # PHP docs.
+      - mkdir /usr/local/share/psysh/
+      - wget http://psysh.org/manual/en/php_manual.sqlite -O /usr/local/share/psysh/php_manual.sqlite
+      - chown www-data /usr/local/share/psysh/php_manual.sqlite
+
+    # Before service runs, as non-root.
+    build:
+      # For installs with existing composer.json.
+      - composer --no-interaction --working-dir=docroot install
