@@ -74,6 +74,9 @@ services:
     #
     # November 13, 2023
     # Drupal 9.5.11 recommends PHP 8.1.6 or higher, "Drupal wants at least 8.0".
+
+    # Lies, deception: tell Lando it's 8.2 instead of 8.3.
+    # https://github.com/lando/php/issues/77.
     type: php:8.2
 
     # Substitute default $cwd app mount with arbitrary external app source.
@@ -86,6 +89,10 @@ services:
       php: ../lando/resources/php.ini
 
     overrides:
+      # Stolen from https://github.com/lando/php/issues/77.
+      build: .
+      image: 'custom/php:8.3.7-zts-bullseye'
+
       volumes:
         # Configure external app source.
         - ~/core:/app
