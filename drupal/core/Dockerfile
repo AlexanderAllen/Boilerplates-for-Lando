@@ -1,6 +1,9 @@
 # docker build -t custom/php:8.3.0RC4-apache-bullseye .
 # FROM php:8.3.0RC4-apache-bullseye
 
+# Credit
+# Author: https://github.com/kaszarobert
+
 # docker build -t custom/php:8.3.7-zts-bullseye .
 FROM php:8.3.7-zts-bullseye
 
