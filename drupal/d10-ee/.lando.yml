@@ -133,6 +133,9 @@ services:
       php: ../lando/resources/php.ini
 
     overrides:
+      build: .
+      image: 'custom/php:8.3.7-zts-bullseye'
+
       volumes:
         # Configure external app source.
         - ~/dreamy-ritchie:/app
