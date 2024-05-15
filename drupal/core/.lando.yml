@@ -61,6 +61,8 @@ services:
     run:
       - mysql -uroot -e "CREATE DATABASE IF NOT EXISTS drupal10_simpletest;"
       - mysql -uroot -e "GRANT ALL ON drupal10_simpletest.* TO 'drupalX'@'%' WITH GRANT OPTION;"
+      - mysql -uroot -e "CREATE DATABASE IF NOT EXISTS drupal11_simpletest;"
+      - mysql -uroot -e "GRANT ALL ON drupal11_simpletest.* TO 'drupalX'@'%' WITH GRANT OPTION;"
 
   memcached:
     type: memcached:1
@@ -96,11 +98,11 @@ services:
       volumes:
         # Configure external app source.
         - ~/3445847:/app
+        - ../lando:/opt/lando
 
       tty: true
       # stdin_open: true
       environment:
-        DRUSH_OPTIONS_URI: https://core.lndo.site
         COMPOSER_ALLOW_XDEBUG: 1
         COMPOSER_DISABLE_XDEBUG_WARN: 1
         # https://docs.lando.dev/config/php.html#configuring-xdebug
