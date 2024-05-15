@@ -17,12 +17,12 @@ tooling:
   drush:
     description: Executes Drush commands
     service: appserver
-    cmd: php vendor/bin/drush --root=/app/docroot
+    cmd: php docroot/vendor/bin/drush --root=/app/docroot
 
   drupal:
     description: Executes Drupal Console commands
     service: appserver
-    cmd: php vendor/bin/drupal --root=/app/docroot
+    cmd: php docroot/vendor/bin/drupal --root=/app/docroot
 
   composer:
     description: Executes composer commands
@@ -95,7 +95,7 @@ services:
 
       volumes:
         # Configure external app source.
-        - ~/core:/app
+        - ~/3445847:/app
 
       tty: true
       # stdin_open: true
