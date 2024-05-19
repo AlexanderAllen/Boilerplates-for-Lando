@@ -5,7 +5,7 @@
 # Author: https://github.com/kaszarobert
 
 # docker build -t custom/php:8.3.7-zts-bullseye .
-FROM php:8.3.7-zts-bullseye
+FROM php:8.3.7-apache-bullseye
 
 # Install dependencies we need
 RUN mkdir -p /usr/share/man/man1 /usr/share/man/man7 \

@@ -32,7 +32,7 @@ tooling:
 
 proxy:
   appserver:
-    - core.lndo.site
+    - d10ee.lndo.site
 
 services:
 
@@ -88,10 +88,10 @@ services:
       php: ../lando/resources/php.ini
 
     overrides:
-      # Stolen from https://github.com/lando/php/issues/77.
+      # Dockerfile credit: https://github.com/kaszarobert
+      # Issue: https://github.com/lando/php/issues/77.
+      image: alexanderallen/lando-custom-php:8.3.7-apache-bullseye
       build: .
-      # image: 'custom/php:8.3.7-zts-bullseye'
-      image: alexanderallen/lando-custom-php:8.3.7-zts-bullseye
 
       volumes:
         # Configure external app source.
