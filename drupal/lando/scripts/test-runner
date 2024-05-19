@@ -1,0 +1,68 @@
+#!/bin/bash
+
+BROWSERTEST_OUTPUT_DIRECTORY=/app/simpletest
+# WEBROOT=/app/docroot/web
+# BROWSERTEST_FILESDIR=$WEBROOT/sites/default/files/simpletest
+
+
+# mkdir -p $BROWSERTEST_OUTPUT_DIRECTORY
+# mkdir -p $BROWSERTEST_FILESDIR
+# chmod -R 755 $BROWSERTEST_OUTPUT_DIRECTORY
+# chmod -R 755 $BROWSERTEST_FILESDIR
+# ln -s $WEBROOT /var/www/html
+# chown -R www-data:www-data $CI_PROJECT_DIR
+# service apache2 start
+
+# export SIMPLETEST_DB=mysql://$MYSQL_USER:$MYSQL_PASSWORD@database/$MYSQL_DATABASE
+# mysql://drupalX:drupalX@database/drupal10_simpletest
+
+cd /app/docroot/web
+
+export SIMPLETEST_BASE_URL=https://core.lndo.site
+export SIMPLETEST_DB="mysql://drupalX:drupalX@database/drupal10_simpletest"
+export BROWSERTEST_OUTPUT_DIRECTORY
+
+# https://www.drupal.org/project/drupal/issues/3445847
+# ../vendor/bin/phpunit -c core/phpunit.xml.dist
+
+# From Lando container
+../vendor/bin/phpunit \
+  --testdox \
+  --no-coverage \
+  --bootstrap core/tests/bootstrap.php \
+  --configuration core/phpunit-mod.xml.dist \
+  --testdox-text $PWD/testdox.txt \
+  --display-errors \
+  --stop-on-error
+
+# From bare metal, functional and kernel only.
+cd 3445847/docroot/web
+
+export SIMPLETEST_BASE_URL=https://core.lndo.site \
+&& export SIMPLETEST_DB="mysql://drupalX:drupalX@127.0.0.1:53846/drupal10_simpletest"
+
+
+../vendor/bin/phpunit \
+  --testdox \
+  --no-coverage \
+  --bootstrap core/tests/bootstrap.php \
+  --configuration core/wsl.xml \
+  --display-errors \
+  --stop-on-error
+
+
+# From WSL
+
+# mysql -uroot -h127.0.0.1 --port=53846
+
+      # sudo -u www-data -E ./phpunit \
+      #   --no-progress \
+      #   --testdox \
+      #   --coverage-text \
+      #   --coverage-filter src \
+      #   --bootstrap $PWD/$_WEB_ROOT/core/tests/bootstrap.php \
+      #   --configuration "$PWD/${MUSICA_PHPUNIT_CONFIG}" \
+      #   --coverage-cobertura $PWD/coverage.cobertura.xml \
+      #   --log-junit $PWD/junit.xml \
+      #   --exclude-group $MUSICA_PHPUNIT_EXCLUDE \
+      #   $PWD/tests

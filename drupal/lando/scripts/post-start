@@ -1,0 +1,9 @@
+#!/bin/bash
+
+printf '\n%s\n' "== DRUSH SANITY CHECK FOR ${LANDO_APP_NAME} =="
+php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} status
+php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} cron
+
+printf '\n%s\n\n' "== WELCOME TO ${LANDO_APP_NAME} =="
+printf '\n%s\n' 'YOUR ONE-TIME USE ADMIN LOGIN LINK IS:'
+php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} uli

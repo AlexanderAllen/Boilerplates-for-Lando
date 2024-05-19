@@ -54,9 +54,6 @@ services:
     environment:
       MARIADB_ENABLE_SLOW_QUERY: 1
       MARIADB_LONG_QUERY_TIME: 2
-    overrides:
-      volumes:
-        - ~/dreamy-ritchie/logs:/opt/logs
 
     run:
       - mysql -uroot -e "CREATE DATABASE IF NOT EXISTS drupal10_simpletest;"
@@ -93,11 +90,13 @@ services:
     overrides:
       # Stolen from https://github.com/lando/php/issues/77.
       build: .
-      image: 'custom/php:8.3.7-zts-bullseye'
+      # image: 'custom/php:8.3.7-zts-bullseye'
+      image: alexanderallen/lando-custom-php:8.3.7-zts-bullseye
 
       volumes:
         # Configure external app source.
-        - ~/3445847:/app
+        # - ~/3445847:/app
+        - ~/dreamy-ritchie:/app
         - ../lando:/opt/lando
 
       tty: true

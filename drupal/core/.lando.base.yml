@@ -2,13 +2,7 @@
 # https://docs.lando.dev/core/v3/events.html
 events:
   post-start:
-    - appserver: printf '\n%s\n' "== DRUSH SANITY CHECK FOR ${LANDO_APP_NAME} =="
-    - appserver: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} status
-    - appserver: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} cron
-
-    - appserver: printf '\n%s\n\n' "== WELCOME TO ${LANDO_APP_NAME} =="
-    - appserver: printf '\n%s\n' 'YOUR ONE-TIME USE ADMIN LOGIN LINK IS:'
-    - appserver: php ${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} uli
+    - appserver: /opt/lando/scripts/post-start
 
 tooling:
 

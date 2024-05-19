@@ -1,0 +1,17 @@
+#!/bin/bash
+
+BROWSERTEST_OUTPUT_DIRECTORY=/app/simpletest
+WEBROOT=/app/docroot/web
+BROWSERTEST_FILESDIR=$WEBROOT/sites/default/files/simpletest
+
+
+mkdir -p $BROWSERTEST_OUTPUT_DIRECTORY
+mkdir -p $BROWSERTEST_FILESDIR
+chmod -R 755 $BROWSERTEST_OUTPUT_DIRECTORY
+chmod -R 755 $BROWSERTEST_FILESDIR
+ln -s $WEBROOT /var/www/html
+# chown -R www-data:www-data $CI_PROJECT_DIR
+# service apache2 start
+
+# export SIMPLETEST_DB=mysql://$MYSQL_USER:$MYSQL_PASSWORD@database/$MYSQL_DATABASE
+# mysql://drupalX:drupalX@database/drupal10_simpletest
