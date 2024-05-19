@@ -4,7 +4,14 @@ name: core
 # https://docs.lando.dev/config/drupal9.html#getting-started
 recipe: drupal10
 config:
-  webroot: docroot
+
+  # IMPORTANT !!!
+  #
+  # Package drupal/core-recommended will place the web root at docroot/web.
+  # If you don't set that here you'll be greeted with a misconfigured Apache response.
+  #
+  # Package drupal/core still places web root at regular docroot.
+  webroot: docroot/web
 
   # https://docs.lando.dev/php/config.html#installing-composer
   composer_version: 2-latest
