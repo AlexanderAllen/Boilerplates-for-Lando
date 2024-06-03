@@ -76,10 +76,10 @@ RUN pecl install apcu \
   && php composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.2.18 \
   && php -r "unlink('composer-setup.php');" \
   && chsh -s /bin/bash www-data && mkdir -p /var/www/.composer && chown -R www-data:www-data /var/www \
-  && apt-get -y clean \
-  && apt-get -y autoclean \
-  && apt-get -y autoremove \
-  && rm -rf /var/lib/apt/lists/* && rm -rf && rm -rf /var/lib/cache/* && rm -rf /var/lib/log/* && rm -rf /tmp/* \
+  # && apt-get -y clean \
+  # && apt-get -y autoclean \
+  # && apt-get -y autoremove \
+  # && rm -rf /var/lib/apt/lists/* && rm -rf && rm -rf /var/lib/cache/* && rm -rf /var/lib/log/* && rm -rf /tmp/* \
   && PHP_OPENSSL=yes docker-php-ext-configure imap --with-kerberos --with-imap-ssl \
   && docker-php-ext-install imap \
   && docker-php-ext-configure gd --enable-gd --with-jpeg --with-webp --with-freetype \
@@ -99,3 +99,20 @@ RUN apt-get install -y git \
     && docker-php-ext-enable xdebug
 
 RUN curl https://dl.yarnpkg.com
+
+
+# If compiling PHP from source, sqlite system dependency needs to be up to date first.
+# If compiling extension, system dependency still needs to be updated.
+RUN \
+  echo "deb http://deb.debian.org/debian trixie main" > /etc/apt/sources.list.d/trixie.list \
+  && apt-get update \
+  && apt-get purge -y libsqlite3-dev \
+  && apt-get install -y --no-install-recommends libsqlite3-dev
+
+# Re-compile extension against updated system dependency.
+# Package sqlite3 will not compile, but the pdo will.
+# Confirm version of sqlite.
+# php -i | grep -i sqlite
+RUN \
+  docker-php-ext-configure pdo_sqlite \
+  && docker-php-ext-install pdo_sqlite
