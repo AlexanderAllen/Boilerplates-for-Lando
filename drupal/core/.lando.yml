@@ -77,7 +77,7 @@ services:
     type: compose
     services:
       image: drupalci/webdriver-chromedriver:production
-      command: chromedriver --log-path=/tmp/chromedriver.log --verbose --whitelisted-ips=
+      command: chromedriver --log-path=/tmp/chromedriver.log --verbose --allowed-origins=* --whitelisted-ips=
 
   appserver:
     # https://docs.lando.dev/config/php.html#supported-versions
@@ -119,13 +119,13 @@ services:
         COMPOSER_DISABLE_XDEBUG_WARN: 1
         # https://docs.lando.dev/config/php.html#configuring-xdebug
         # https://xdebug.org/docs/all_settings#mode
-        XDEBUG_CONFIG: "idekey=VSCODE,discover_client_host=false"
+        # XDEBUG_CONFIG: "idekey=VSCODE,discover_client_host=false"
 
         # Optional, set XDEBUG_MODE manually.
         # XDEBUG_MODE: debug,develop,coverage
-        XDEBUG_MODE: "debug,develop,coverage"
+        # XDEBUG_MODE: "debug,develop,coverage"
 
-        MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","chromeOptions":{"args":["--disable-gpu","--headless"]}}, "http://chrome:9515"]'
+        # MINK_DRIVER_ARGS_WEBDRIVER: '["chrome", {"browserName":"chrome","chromeOptions":{"args":["--disable-gpu","--headless"]}}, "http://chrome:9515"]'
 
         # https://alexanderallen.medium.com/visual-studio-code-wsl-running-php-intellisense-from-alpine-linux-on-windows-10-78e8a990f1cc
         # Set privately via private.env for Windows environments.
@@ -143,8 +143,9 @@ services:
       - apt update -y
       - apt-get install -y telnet iputils-ping iproute2 lsb-release
       - echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php-sury.list
-      - pecl install pcov
-      - docker-php-ext-enable pcov
+      # Use xdebug, pcov is for the weak.
+      # - pecl install pcov
+      # - docker-php-ext-enable pcov
 
       # PHP docs.
       - mkdir /usr/local/share/psysh/
