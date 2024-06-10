@@ -36,15 +36,21 @@ tooling:
     description: Install a fresh Drupal database
     service: appserver
     dir: /app/docroot
-    cmd:
-      - php `${DRUPAL_VENDOR}/bin/drush --root=${DRUPAL_ROOT} site-install --yes --db-url=mysql://${APP_DB_ROOTUSER}@database:3306/${APP_DB_NAME}
-        --db-su=${APP_DB_USER}
-        --db-su-pw=${APP_DB_PASS}
-        --account-name="admin"
-        --account-pass="admin"
-        --uri=${DRUSH_OPTIONS_URI}
-        --site-name="boilerplate-d9"
-        standard`
+    cmd: |
+      echo "";
+      echo "Lando is now installing a shiny and chrome Drupal database!";
+      echo "";
+      php ${DRUPAL_VENDOR}/bin/drush \
+      --root=${DRUPAL_ROOT} site-install \
+      --yes \
+      --db-url="mysql://${APP_DB_NAME}:${APP_DB_PASS}@database:3306/${APP_DB_NAME}" \
+      --db-su=${APP_DB_NAME} \
+      --db-su-pw=${APP_DB_PASS} \
+      --account-name="admin" \
+      --account-pass="admin" \
+      --uri=${DRUSH_OPTIONS_URI} \
+      --site-name="${LANDO_APP_PROJECT}" \
+      standard
 
   nuke:
     description: Nuke Composer vendor dependencies
