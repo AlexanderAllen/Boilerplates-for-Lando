@@ -158,22 +158,10 @@ tooling:
     cmd:
       - appserver: lando/scripts/dd.sh
 
-  phpunit:
-    description: Invokes PHPUnit binary.
-    dir: /app/docroot
-    cmd:
-      - appserver: vendor/bin/phpunit web/modules/contrib/musica/tests --testdox --exclude-group ignore --verbose
-
-  phpunitdd:
-    description: Debug PHPUnit
-    dir: /app/docroot
-    cmd:
-      - appserver: export XDEBUG_CONFIG="idekey=VSCODE" && vendor/bin/phpunit web/modules/contrib/musica/tests --testdox --exclude-group ignore --verbose
-
   # Call PHPUnit from the directory that contains Drupal core /vendor.
   # It's where bootstrap.php expects to be called from.
   test:
-    description: Debug PHPUnit
+    description: Invoke PHPUnit test runner
     dir: /app/docroot
     cmd:
       - appserver: ./test-lando
